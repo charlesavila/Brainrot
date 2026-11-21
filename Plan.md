@@ -499,62 +499,11 @@ The test will specifically check that disabling or removing the mod does not lea
 
 ### Stage 6: Expand the character library
 
-The expansion process will be asset-first and code-free for normal characters.
-
-**Required artist folder layout**
-
-Keep all source work and textures local to the character:
-
-```text
-AssetSources/<Character>/
-Assets/<Character>/
-ModuleData/character_replacements.xml
-```
-
-Use a consistent character ID in the source folder and catalog entry. The source FBX mesh name must exactly match the `mesh` value in the catalog.
-
-**Per-character workflow**
-
-1. Rig the model to the accepted Bannerlord human skeleton with exact bones, rest transforms, weights, facing, and scale.
-2. Generate/import the geometry, material, and texture packages under `Assets/<Character>/`.
-3. Add one catalog entry containing `id`, `mesh`, and `troop_id`.
-4. Exit and relaunch Bannerlord.
-5. Test the character on one native troop in a controlled battle.
-6. Verify native weapons, shields, armor values, hitboxes, and troop stats remain unchanged.
-7. Add the character to the compatibility library only after it passes the focused POC checks.
-
-**Artist checklist**
-
-- exact mesh name recorded from the imported FBX;
-- model rooted and scaled consistently;
-- all weapons held in native grips;
-- native head, face, hands, boots, wrist equipment, shoulders, and attached armor removed or covered as required;
-- no custom equipment slot or save data introduced;
-- generated assets kept under the matching character folder;
-- redistribution rights recorded for the model and textures.
-
-**Character rollout**
-
-Characters will be added in small batches of 5-10 so one bad asset cannot hide failures in the rest of the library. The batch order is:
-
-1. a standard humanoid;
-2. a large or proportionally unusual humanoid;
-3. a character with a distinct head shape;
-4. a character with facial hair, horns, a helmet-like silhouette, or unusual hands;
-5. remaining characters after the first batch proves the asset conventions.
-
-No new troop code is needed for ordinary additions. A character that needs a special hide/coverage treatment will add a small catalog optional field, such as coverage settings or a special visual preset. The exception must be isolated and limited to that character rather than copied into every entry.
-
-**Batch completion record**
-
-Each accepted character should have a short record in the catalog or release documentation containing:
-
-- catalog character ID;
-- mesh name;
-- native troop ID;
-- tested game version;
-- known visual limitations;
-- source/redistribution status.
+My workflow -
+Import the FBX and generated assets in the Bannerlord editor.
+Add the mesh to ModuleData/meme_characters.xml as a BodyArmor item.
+Add matching <Character ... /> entry to ModuleData/character_replacements.xml.
+Restart Bannerlord.
 
 ### Stage 7: Package and maintain the release
 1. Separate source assets, generated game assets, module files, and development-only files.

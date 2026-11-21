@@ -22,18 +22,65 @@ namespace Brainrot
         public static TroopReplacementConfig Load()
         {
             TroopReplacementConfig config = new TroopReplacementConfig();
-            string configPath = FindConfigPath();
+            string configPath = FindConfigPath("character_replacements.xml");
+
+            if (configPath != null)
+            {
+                XmlDocument catalogDocument = new XmlDocument();
+                catalogDocument.Load(configPath);
+                XmlNodeList characters = catalogDocument.SelectNodes("/BrainrotCharacters/Character");
+
+                if (characters != null)
+                {
+                    foreach (XmlElement element in characters)
+                    {
+                        string characterId = element.GetAttribute("id").Trim();
+                        string meshName = element.GetAttribute("mesh").Trim();
+                        string troopId = element.GetAttribute("troop_id").Trim();
+
+                        if (string.IsNullOrWhiteSpace(characterId) ||
+                            string.IsNullOrWhiteSpace(meshName) ||
+                            string.IsNullOrWhiteSpace(troopId))
+                        {
+                            Debug.Print("Brainrot: ignored a Character with missing id, mesh, or troop_id.");
+                            continue;
+                        }
+
+                        if (config.replacements.ContainsKey(troopId))
+                        {
+                            Debug.Print("Brainrot: duplicate troop_id in character_replacements.xml: " + troopId);
+                            continue;
+                        }
+
+                        string itemId = characterId + "_body_armor";
+                        config.replacements.Add(troopId, itemId);
+                        Debug.Print("Brainrot: loaded character " + characterId +
+                                    " with mesh " + meshName +
+                                    " for troop " + troopId +
+                                    " -> " + itemId);
+                    }
+                }
+                else
+                {
+                    Debug.Print("Brainrot: character_replacements.xml has no Character entries.");
+                }
+            }
+            else
+            {
+                Debug.Print("Brainrot: character_replacements.xml was not found; loading legacy replacements.");
+            }
+
+            configPath = FindConfigPath("troop_replacements.xml");
 
             if (configPath == null)
             {
-                Debug.Print("Brainrot: troop_replacements.xml was not found.");
                 return config;
             }
 
-            XmlDocument document = new XmlDocument();
-            document.Load(configPath);
+            XmlDocument legacyDocument = new XmlDocument();
+            legacyDocument.Load(configPath);
 
-            XmlNodeList nodes = document.SelectNodes("/TroopReplacements/TroopReplacement");
+            XmlNodeList nodes = legacyDocument.SelectNodes("/TroopReplacements/TroopReplacement");
             if (nodes == null)
             {
                 Debug.Print("Brainrot: troop_replacements.xml has no TroopReplacement entries.");
@@ -53,7 +100,6 @@ namespace Brainrot
 
                 if (config.replacements.ContainsKey(troopId))
                 {
-                    Debug.Print("Brainrot: duplicate troop_id in troop_replacements.xml: " + troopId);
                     continue;
                 }
 
@@ -69,15 +115,15 @@ namespace Brainrot
             return replacements.TryGetValue(troopId, out itemId);
         }
 
-        private static string FindConfigPath()
+        private static string FindConfigPath(string fileName)
         {
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
             string[] candidates =
             {
-                Path.GetFullPath(Path.Combine(baseDirectory, "..", "..", "Modules", "Brainrot", "ModuleData", "troop_replacements.xml")),
-                Path.GetFullPath(Path.Combine(baseDirectory, "..", "Modules", "Brainrot", "ModuleData", "troop_replacements.xml")),
-                Path.GetFullPath(Path.Combine(baseDirectory, "Modules", "Brainrot", "ModuleData", "troop_replacements.xml")),
-                Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "Modules", "Brainrot", "ModuleData", "troop_replacements.xml"))
+                Path.GetFullPath(Path.Combine(baseDirectory, "..", "..", "Modules", "Brainrot", "ModuleData", fileName)),
+                Path.GetFullPath(Path.Combine(baseDirectory, "..", "Modules", "Brainrot", "ModuleData", fileName)),
+                Path.GetFullPath(Path.Combine(baseDirectory, "Modules", "Brainrot", "ModuleData", fileName)),
+                Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "Modules", "Brainrot", "ModuleData", fileName))
             };
 
             foreach (string candidate in candidates)

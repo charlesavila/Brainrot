@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BrainrotCharacters>
+  <Character id="shrek"
+             mesh="Shrek"
+             troop_id="looter" />
+  <Character id="mike"
+             mesh="Longmicheal"
+             troop_id="battanian_volunteer" />
+  <Character id="luigi"
+             mesh="Luigi"
+             troop_id="battanian_woodrunner" />
+</BrainrotCharacters>

@@ -25,14 +25,7 @@
 	</SubModules>
 	<Xmls>
 		<XmlNode>
-			<XmlName id="Items" path="mike_items" />
-			<IncludedGameTypes>
-				<GameType value="Campaign" />
-				<GameType value="CampaignStoryMode" />
-			</IncludedGameTypes>
-		</XmlNode>
-		<XmlNode>
-  			<XmlName id="Items" path="shrek_items" />
+  			<XmlName id="Items" path="meme_characters" />
   			<IncludedGameTypes>
     			<GameType value="Campaign" />
     			<GameType value="CampaignStoryMode" />

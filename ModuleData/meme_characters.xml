@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Items>
+  <Item id="shrek_body_armor"
+        name="Shrek Costume"
+        mesh="Shrek"
+        culture="Culture.empire"
+        weight="5"
+        appearance="1"
+        is_merchandise="true"
+        Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0"
+             covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true"
+             modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="mike_body_armor"
+        name="Mike Wazowski Costume"
+        mesh="Longmicheal"
+        culture="Culture.battania"
+        weight="0"
+        appearance="1"
+        is_merchandise="true"
+        Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0"
+             covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true"
+             modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="luigi_body_armor"
+        name="Luigi Costume"
+        mesh="Luigi"
+        culture="Culture.battania"
+        weight="0"
+        appearance="1"
+        is_merchandise="true"
+        Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0"
+             covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true"
+             modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+</Items>
