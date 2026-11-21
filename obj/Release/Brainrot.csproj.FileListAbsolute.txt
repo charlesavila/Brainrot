@@ -1,0 +1,9 @@
+C:\Program Files (x86)\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\Brainrot\bin\Release\Brainrot.dll
+C:\Program Files (x86)\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\Brainrot\bin\Release\Brainrot.pdb
+C:\Program Files (x86)\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\Brainrot\obj\Release\Brainrot.csproj.AssemblyReference.cache
+C:\Program Files (x86)\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\Brainrot\obj\Release\Brainrot.GeneratedMSBuildEditorConfig.editorconfig
+C:\Program Files (x86)\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\Brainrot\obj\Release\Brainrot.AssemblyInfoInputs.cache
+C:\Program Files (x86)\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\Brainrot\obj\Release\Brainrot.AssemblyInfo.cs
+C:\Program Files (x86)\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\Brainrot\obj\Release\Brainrot.csproj.CoreCompileInputs.cache
+C:\Program Files (x86)\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\Brainrot\obj\Release\Brainrot.dll
+C:\Program Files (x86)\Steam\steamapps\common\Mount & Blade II Bannerlord\Modules\Brainrot\obj\Release\Brainrot.pdb

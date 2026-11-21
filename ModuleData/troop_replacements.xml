@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TroopReplacements>
+  <TroopReplacement troop_id="looter" visual_item_id="shrek_body_armor" />
+  <TroopReplacement troop_id="battanian_volunteer" visual_item_id="mike_body_armor" />
+</TroopReplacements>
