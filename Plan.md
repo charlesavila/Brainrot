@@ -99,9 +99,9 @@ The recommended validation order is:
 
 ## Current Shrek asset status
 
-- `AssetSources/bandits/Shrek.fbx` is present and is a Blender 2.92-era binary FBX source file.
-- `AssetSources/bandits/ShrekShirt.png` is the source texture.
-- `Assets/bandits/Shrek_geo.tpac`, `Assets/bandits/shrek_mtl.tpac`, and `Assets/bandits/ShrekShirt_tex.tpac` are generated game assets.
+- `AssetSources/bandits/shrek/Shrek.fbx` is present and is a Blender 2.92-era binary FBX source file.
+- `AssetSources/bandits/shrek/ShrekShirt.png` is the source texture.
+- `Assets/bandits/shrek/Shrek_geo.tpac`, `Assets/bandits/shrek/shrek_mtl.tpac`, and `Assets/bandits/shrek/ShrekShirt_tex.tpac` are generated game assets.
 - `ModuleData/shrek_items.xml` defines test item `shrek_body_armor` as a `BodyArmor` with mesh `Shrek`.
 - `SubModule.xml` loads `shrek_items.xml` for Campaign and CampaignStoryMode.
 - The item can be given with `campaign.add_item_to_player_party shrek_body_armor`.
@@ -131,7 +131,7 @@ Stage 1 is a hands-on Blender and Bannerlord visual-validation pass. No code or 
 
 **Blender validation**
 
-1. Open [Shrek.fbx](/c:/Program%20Files%20%28x86%29/Steam/steamapps/common/Mount%20&%20Blade%20II%20Bannerlord/Modules/Memeverse/AssetSources/bandits/Shrek.fbx) and the native [human_skeleton.fbx](/c:/Program%20Files%20%28x86%29/Steam/steamapps/common/Mount%20&%20Blade%20II%20Bannerlord/modding_resources/skeletons/human_skeleton.fbx).
+1. Open [Shrek.fbx](/c:/Program%20Files%20%28x86%29/Steam/steamapps/common/Mount%20&%20Blade%20II%20Bannerlord/Modules/Brainrot/AssetSources/bandits/shrek/Shrek.fbx) and the native [human_skeleton.fbx](/c:/Program%20Files%20%28x86%29/Steam/steamapps/common/Mount%20&%20Blade%20II%20Bannerlord/modding_resources/skeletons/human_skeleton.fbx).
 2. Preserve the currently accepted visual scale; do not rescale unless an in-game or skeleton-alignment defect proves correction is necessary.
 3. Confirm the Shrek mesh remains parented to and weighted by the in-game-compatible rig.
 4. Confirm the material's skinning property remains enabled and the mesh follows representative poses without detached limbs.
@@ -368,11 +368,11 @@ Stage 4 is the first second-character implementation pass. It begins after the L
 
 **Mike asset state**
 
-- Source asset: `AssetSources/battania/LongMike.fbx`
+- Source asset: `AssetSources/battania/mike_wazowski/LongMike.fbx`
 - Mesh object inside the FBX: `Longmicheal`
-- Generated geometry: `Assets/battania/LongMike_geo.tpac`
-- Generated texture: `Assets/battania/MikeBody_tex.tpac`
-- Generated normal/bump texture: `Assets/battania/MikeBodyBump_tex.tpac`
+- Generated geometry: `Assets/battania/mike_wazowski/LongMike_geo.tpac`
+- Generated texture: `Assets/battania/mike_wazowski/MikeBody_tex.tpac`
+- Generated normal/bump texture: `Assets/battania/mike_wazowski/MikeBodyBump_tex.tpac`
 - Generated material: `Assets/battania/mikebody_mtl.tpac`
 - Intended visual item: `mike_body_armor`
 - Intended mapping: `battanian_volunteer -> mike_body_armor`

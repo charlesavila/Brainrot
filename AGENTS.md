@@ -24,7 +24,7 @@ Functional Proof-of-Concept: A working base mod where the Looter is replaced wit
 Configuration File (troop_replacement): An easy-to-read configuration file/system allowing troop replacement mappings (e.g., mapping Vlandian Swordsman to a specific model file).
 Future Workflow: Modding workflow for remaining assets must consist purely of rigging models, importing them, and updating mapping definitions in the configuration file.
 5. Current Shrek Test Status
-The source FBX `AssetSources/bandits/Shrek.fbx`, material `AssetSources/bandits/ShrekShirt.png`, converted geometry `Assets/bandits/Shrek_geo.tpac`, material `Assets/bandits/shrek_mtl.tpac`, and texture `Assets/bandits/ShrekShirt_tex.tpac` are present. `SubModule.xml` loads `ModuleData/shrek_items.xml`, which defines item ID `shrek_body_armor` with mesh reference `Shrek`.
+The source FBX `AssetSources/bandits/shrek/Shrek.fbx`, material `AssetSources/bandits/shrek/ShrekShirt.png`, converted geometry `Assets/bandits/shrek/Shrek_geo.tpac`, material `Assets/bandits/shrek/shrek_mtl.tpac`, and texture `Assets/bandits/shrek/ShrekShirt_tex.tpac` are present. `SubModule.xml` loads `ModuleData/shrek_items.xml`, which defines item ID `shrek_body_armor` with mesh reference `Shrek`.
 
 The following armor-item test works:
 - The Shrek material and mesh load in game.
