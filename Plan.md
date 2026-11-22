@@ -505,6 +505,16 @@ Add the mesh to ModuleData/meme_characters.xml as a BodyArmor item.
 Add matching <Character ... /> entry to ModuleData/character_replacements.xml.
 Restart Bannerlord.
 
+current problems - 
+gigachad uv mapping is bugged
+pepsi man uv mapping is bugged
+pepsi man doesn't show up for mercenary 7, the new name for that troop is hired pikeman?
+homer simpson texturing looks awful
+minecraft steve will be duplicated to have pewdiepie and herobrine, but their textures are not working. Also I need to export fbx with new mesh names
+most character meshes have a shading bug that puts a sharp line down their face
+No way to tell what troops are on which side.
+
+
 ### Stage 7: Package and maintain the release
 1. Separate source assets, generated game assets, module files, and development-only files.
 2. Keep the release package limited to required runtime files.

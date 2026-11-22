@@ -150,4 +150,214 @@
              modifier_group="cloth" material_type="Cloth" />
     </ItemComponent>
   </Item>
+  <Item id="Aang_body_armor"
+        name="Aang Costume"
+        mesh="aang"
+        culture="Culture.khuzait"
+        weight="0"
+        appearance="1"
+        is_merchandise="true"
+        Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0"
+             covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true"
+             modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="Among_us_body_armor"
+        name="Among Us Costume"
+        mesh="amongus"
+        culture="Culture.empire"
+        weight="0"
+        appearance="1"
+        is_merchandise="true"
+        Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0"
+             covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true"
+             modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="Jimmy_Neutron_body_armor"
+        name="Jimmy Neutron Costume"
+        mesh="jimmy"
+        culture="Culture.vlandia"
+        weight="0"
+        appearance="1"
+        is_merchandise="true"
+        Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0"
+             covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true"
+             modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="Carl_Wheezer_body_armor"
+        name="Carl Wheezer Costume"
+        mesh="carl"
+        culture="Culture.vlandia"
+        weight="0"
+        appearance="1"
+        is_merchandise="true"
+        Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0"
+             covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true"
+             modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="Sheen_body_armor"
+        name="Sheen Costume"
+        mesh="sheen"
+        culture="Culture.vlandia"
+        weight="0"
+        appearance="1"
+        is_merchandise="true"
+        Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0"
+             covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true"
+             modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="Fortnite_body_armor"
+        name="Fortnite Costume"
+        mesh="fortniteblack"
+        culture="Culture.aserai"
+        weight="0"
+        appearance="1"
+        is_merchandise="true"
+        Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0"
+             covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true"
+             modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="Homer_Simpson_body_armor"
+        name="Homer Simpson Costume"
+        mesh="homer"
+        culture="Culture.vlandia"
+        weight="0"
+        appearance="1"
+        is_merchandise="true"
+        Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0"
+             covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true"
+             modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="Spongebob_body_armor"
+        name="Spongebob Costume"
+        mesh="spongebob"
+        culture="Culture.battania"
+        weight="0"
+        appearance="1"
+        is_merchandise="true"
+        Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0"
+             covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true"
+             modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="Patrick_body_armor"
+        name="Patrick Costume"
+        mesh="patrick"
+        culture="Culture.battania"
+        weight="0"
+        appearance="1"
+        is_merchandise="true"
+        Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0"
+             covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true"
+             modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="Squidward_body_armor"
+        name="Squidward Costume"
+        mesh="squidward"
+        culture="Culture.battania"
+        weight="0"
+        appearance="1"
+        is_merchandise="true"
+        Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0"
+             covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true"
+             modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="Plankton_body_armor"
+        name="Plankton Costume"
+        mesh="plankton"
+        culture="Culture.battania"
+        weight="0"
+        appearance="1"
+        is_merchandise="true"
+        Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0"
+             covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true"
+             modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="Mr_Krabs_body_armor"
+        name="Mr. Krabs Costume"
+        mesh="mrkrabs"
+        culture="Culture.battania"
+        weight="0"
+        appearance="1"
+        is_merchandise="true"
+        Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0"
+             covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true"
+             modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="Roblox_body_armor"
+        name="Roblox Costume"
+        mesh="roblox"
+        culture="Culture.empire"
+        weight="0"
+        appearance="1"
+        is_merchandise="true"
+        Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0"
+             covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true"
+             modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="Stormtrooper_body_armor"
+        name="Stormtrooper Costume"
+        mesh="stormtrooper"
+        culture="Culture.empire"
+        weight="0"
+        appearance="1"
+        is_merchandise="true"
+        Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0"
+             covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true"
+             modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
 </Items>
