@@ -22,6 +22,14 @@
       <HintPath>$(BannerlordClient)\TaleWorlds.Core.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="TaleWorlds.CampaignSystem">
+      <HintPath>$(BannerlordClient)\TaleWorlds.CampaignSystem.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="TaleWorlds.ScreenSystem">
+      <HintPath>$(BannerlordClient)\TaleWorlds.ScreenSystem.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="TaleWorlds.Engine">
       <HintPath>$(BannerlordClient)\TaleWorlds.Engine.dll</HintPath>
       <Private>false</Private>
