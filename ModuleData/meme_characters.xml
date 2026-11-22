@@ -45,4 +45,109 @@
              modifier_group="cloth" material_type="Cloth" />
     </ItemComponent>
   </Item>
+  <Item id="masterchief_body_armor"
+        name="Master Chief Costume"
+        mesh="masterchief"
+        culture="Culture.empire"
+        weight="0"
+        appearance="1"
+        is_merchandise="true"
+        Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0"
+             covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true"
+             modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="gru_body_armor"
+        name="Gru Costume"
+        mesh="grumesh"
+        culture="Culture.empire"
+        weight="0"
+        appearance="1"
+        is_merchandise="true"
+        Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0"
+             covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true"
+             modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="hugh_body_armor"
+        name="Hugh Neutron Costume"
+        mesh="hugh"
+        culture="Culture.vlandia"
+        weight="0"
+        appearance="1"
+        is_merchandise="true"
+        Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0"
+             covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true"
+             modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="steve_body_armor"
+        name="Steve Costume"
+        mesh="steve"
+        culture="Culture.vlandia"
+        weight="0"
+        appearance="1"
+        is_merchandise="true"
+        Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0"
+             covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true"
+             modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="pepsiman_body_armor"
+        name="Pepsi Man Costume"
+        mesh="pepsimanmesh"
+        culture="Culture.empire"
+        weight="0"
+        appearance="1"
+        is_merchandise="true"
+        Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0"
+             covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true"
+             modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="subwaysurfer_body_armor"
+        name="Subway Surfer Costume"
+        mesh="subwaysurfer"
+        culture="Culture.khuzait"
+        weight="0"
+        appearance="1"
+        is_merchandise="true"
+        Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0"
+             covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true"
+             modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="tf2heavy_body_armor"
+        name="TF2 Heavy Costume"
+        mesh="heavy"
+        culture="Culture.sturgia"
+        weight="0"
+        appearance="1"
+        is_merchandise="true"
+        Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0"
+             covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true"
+             modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
 </Items>

@@ -9,4 +9,25 @@
   <Character id="luigi"
              mesh="Luigi"
              troop_id="battanian_woodrunner" />
+  <Character id="masterchief"
+             mesh="masterchief"
+             troop_id="imperial_sergeant_crossbowman" />
+  <Character id="gru"
+             mesh="grumesh"
+             troop_id="imperial_heavy_horseman" />
+  <Character id="hugh"
+             mesh="hugh"
+             troop_id="vlandian_sharpshooter" />
+  <Character id="pepsiman"
+             mesh="pepsimanmesh"
+             troop_id="mercenary_7" />
+  <Character id="steve"
+             mesh="steve"
+             troop_id="vlandian_recruit" />
+  <Character id="subwaysurfer"
+             mesh="subwaysurfer"
+             troop_id="steppe_bandits_bandit" />
+  <Character id="tf2heavy"
+             mesh="heavy"
+             troop_id="sturgian_veteran_bowman" />
 </BrainrotCharacters>
