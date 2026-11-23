@@ -205,6 +205,8 @@ Stage 1 is therefore **partially complete**: the mesh import and in-game animati
 
 **Exit criteria:** The POC asset animates correctly and a body-hiding mechanism is identified through direct Blender and in-game testing. Weapons, shields, troop stats, armor values, and hitboxes must remain unchanged.
 
+**Complete**
+
 ### Stage 2: Build the smallest visual-replacement proof of concept
 
 Stage 2 may begin, but it must treat native body suppression as part of the POC rather than assuming the chest armor item is sufficient. The POC will first determine whether runtime visual construction or XML skin replacement can suppress the remaining forearms, hands, calves, feet, head/face, and attached armor meshes.
@@ -223,100 +225,10 @@ Stage 2 may begin, but it must treat native body suppression as part of the POC 
 9. Keep native weapons and shields visible and usable.
 10. Ensure the replacement is inactive when the module is disabled or removed.
 
-**Stage 2 implementation status**
-
-- A buildable C# project is present at `Brainrot.csproj`.
-- The mission behavior is in `src/MemeverseMissionBehavior.cs`.
-- The submodule registration is in `src/MemeverseSubModule.cs`.
-- `SubModule.xml` loads `Brainrot.dll` for the module.
-- The runtime DLL is built at `bin/Win64_Shipping_Client/Brainrot.dll`.
-- The POC intentionally changes only agent visual components in missions.
-- Native troop/equipment records and agent combat data are not assigned or modified.
-- Campaign-map representation is not yet confirmed by this implementation and remains a separate Stage 2 test.
-
-**Stage 2 in-game test directions**
-
-1. Run `build.bat` only after source changes; it copies the Release DLL into the module runtime directory.
-2. Launch the Bannerlord launcher and enable `Brainrot` with its native dependencies.
-3. Start a campaign or load `Osbjorngolfsson.sav`.
-4. Find a native Looter party or enter a battle containing Looters.
-5. In battle, verify that Looters receive the Shrek MetaMesh and that native weapons/shields still render.
-6. Verify that native combat behavior is unchanged: health, damage, weapon attacks, and armor behavior should match an unmodified Looter.
-7. Check the campaign map for an immediate representative change if the campaign-map renderer uses the same agent visual; this POC does not yet claim campaign-map support.
-8. Disable `Brainrot` and relaunch: Looters must return to their native visuals.
-9. Re-enable `Brainrot`: the POC must repeat the same visual-only result without a save migration or custom save record.
-
-**Stage 2 pass/fail observations**
-
-- Battle spawn: pass/fail. Pass
-- Campaign map: pass/fail. Pass
-- Native body/limbs hidden: pass/fail. fail
-- Head hidden or replaced: pass/fail. fail
-- Weapons retained: pass/fail. Pass
-- Shields retained: pass/fail. Pass
-- Native armor/damage behavior retained: pass/fail. Pass
-- Module disable removal: pass/fail. pass
--To summarize, nothing changed in the game, the looters were just looters with nothing different.
-
-**Stage 2 root-cause correction**
-
-- The original POC attached the full Shrek mesh to `BodyMeshTypes.Chestpiece`, although Shrek is a full-body mesh.
-- The original match also assumed the exact in-memory troop ID was `looter` and did not account for an optional namespace prefix.
-- The corrected POC now:
-  - matches `looter` and namespaced IDs ending in `.looter`;
-  - applies in `OnAgentBuild`;
-  - retries during mission ticks;
-  - loads `Shrek` only once;
-  - adds the mesh to `BodyMeshTypes.Body`;
-  - prints module, mission-behavior, troop-match, and successful-application diagnostics.
-- The corrected POC still covers missions/battles only. Campaign-map party rendering needs a separate campaign map-entity implementation and is not resolved by the mission behavior.
-
-**Stage 2 corrected test**
-
-1. Exit Bannerlord completely.
-2. Run `build.bat` and confirm `bin/Win64_Shipping_Client/Brainrot.dll` is updated.
-3. Enable `Brainrot` in the launcher.
-4. Load `Osbjorngolfsson.sav` or start a controlled campaign.
-5. Find a native Looter and enter a battle.
-6. A successful fix should replace the Looter body visual with Shrek while weapons and shields remain visible.
-7. Native limbs, face, and armor should be compared against the still-attached native skin components.
-8. Disable the module and relaunch to confirm native Looters return.
-9. The POC is not considered campaign-map complete unless Looters visibly change on the campaign map through the campaign/map implementation.
-
-Results - I loaded into the looter battle. When I rode up on my horse I noticed the troops were invisible. I went up to where they should be, I heard a swing (had to be from a looter) and the game crashed. All looters were invisible, and none had the shrek skin
-
-**Latest test diagnosis**
-
-- The crash and complete invisibility show that clearing native visual components is unsafe for this POC.
-- `ClearVisualComponents(false, false)` must not be used as a body replacement mechanism; it removes native mesh components required by an active agent visual.
-- The immediate fix is to stop clearing components and instead add Shrek as a body visual while preserving native skin, skeleton, weapons, shields, and armor entities.
-- Native limbs may remain visible beneath Shrek, but a stable additive test is required before any mesh replacement or hiding code is attempted.
-
-Results - I loaded in and the looters looked like the standard in game looters with not changes whatsoever. The game did not crash.
-
-**Stage 2 proven-item correction**
-
-- The POC now uses Bannerlord's normal item/visual pipeline instead of manually attaching a MetaMesh.
-- It clones the native Looter spawn equipment and replaces only the visual equipment element in the cloned object.
-- The replacement BodyArmor element is `shrek_body_armor`, already proven to load and animate as a Shrek mesh.
-- The code calls `UpdateSpawnEquipmentAndRefreshVisuals`, which rebuilds agent visuals through native equipment handling.
-- The native `Agent.Character`, troop record, combat equipment, armor values, and hitboxes are not changed.
-- If the item is not registered, the code prints an explicit diagnostic rather than silently changing the troop.
-
-Results - It worked perfectly. They only had the shrek mesh and their weapons visible. I was able to kill them, and they were able to swing their visible weapons at me and deal damage. The game did not crash, and ran very well.
-
-**Stage 2 completion**
-
-- Battle POC: passed.
-- Looter body replacement: passed.
-- Native weapons and shields: preserved and visible.
-- Native combat damage: preserved.
-- Stability: passed; no crash.
-- Native character, troop, hitbox, and combat equipment records were not modified.
-- Campaign-map coverage remains a separate verification item in Stage 4 unless the existing campaign visual result is later confirmed for replaced Looters.
-- Stage 2 is complete for the battle POC.
 
 **Exit criteria:** A new campaign and a pre-existing compatible save can show the replacement Looter on the campaign map and in battle, while native combat behavior remains unchanged.
+
+**Complete**
 
 ### Stage 3: Add the replacement configuration
 
@@ -361,6 +273,8 @@ Results - It worked perfectly. They only had the shrek mesh and their weapons vi
 - Stage 3 is complete.
 
 **Exit criteria:** Changing a mapping does not require code changes, and invalid mappings fail visibly rather than producing a misleading successful load.
+
+**Complete**
 
 ### Stage 4: Add Mike Wazowski and solve native body/head hiding
 
@@ -427,6 +341,8 @@ The second-character POC is complete only when:
 - Native weapons and shields remain visible.
 - Combat damage, armor values, hitboxes, stats, and equipment are unchanged.
 - The Mike implementation remains stable with no crashes or save-state changes.
+
+**Complete**
 
 ### Stage 5: Verify compatibility and removal behavior
 
@@ -497,7 +413,249 @@ The test will specifically check that disabling or removing the mod does not lea
 - The implementation used for expansion is proven reliable on clean launch and repeated save/load.
 - A specific limitation is documented before expansion, rather than discovered after 100 entries.
 
-### Stage 6: Expand the character library
+**Complete**
+
+### Stage 6: Party-Manager Troop Preview of Meme Troops
+
+Goal
+In the campaign map, pressing P opens the Party Manager. When a troop is selected, it should display in the large 3D character preview with its assigned meme character mesh, while continuing to show its normal weapons and shields.
+Examples:
+Looter → Shrek
+Battanian Volunteer → Mike Wazowski
+Battanian Wood Runner → Luigi
+The native troop stats, weapons, shields, equipment values, hitboxes, upgrades, and identity must remain unchanged.
+The desired result is the same as the meme appearance in battles, but rendered in the Party Manager’s center character tableau.
+
+**Party-Manager Troop Preview Problem Log**
+
+Successful Progress: Making the Character Invisible
+The only result that worked meaningfully was making the native character disappear and exposing only the vanilla weapons/equipment.
+This happened when I replaced the troop’s Body equipment slot and cleared the following slots:
+Head
+Cape
+Gloves
+Leg
+The replacement used the existing costume items:
+shrek_body_armor
+mike_body_armor
+luigi_body_armor
+The items are XML BodyArmor entries with:
+mesh="Shrek"
+mesh="Longmicheal"
+mesh="Luigi"
+covers_head="true"
+covers_legs="true"
+covers_hands="true"
+This removed native:
+Boots
+Wrist armor
+Shoulders/cape
+Head/face
+Visible native leg equipment
+Most of the visible native body
+It also left weapons and shields visible. It demonstrated that the meme armor could be used to suppress native visual equipment and preserve weapons.
+The failure was that, in the Party Manager preview, the meme mesh itself did not render. Bannerlord instead showed:
+An empty or invisible character body
+Floating weapons
+Occasionally shoulder armor or boots when not enough slots were cleared
+Or the completely vanilla character when no preview override was applied successfully
+Why That Progress Happened
+The Party Manager does not simply display a live agent. It creates a rendered character tableau.
+The relevant Party Screen UI uses:
+PartyScreen.xml
+PartyTroopTuple.xml
+PartyTroopTupleLeft.xml
+CharacterTableauWidget
+SelectedCharacter
+CharStringId
+BodyProperties
+EquipmentCode
+The actual preview is a cached 3D character texture generated by Bannerlord’s tableau system.
+Changing the party troop XML or selected view-model equipment is therefore not guaranteed to affect the existing rendered tableau texture.
+The character-body and equipment selection happened in one place, but the renderer caching, regeneration, and equipment-code reconstruction happened in another place.
+Attempt 1: Native NPC Equipment XML
+I updated ModuleData/spnpccharacters.xml to override the native troop records.
+I placed the meme item in the Body slot for:
+looter
+battanian_volunteer
+battanian_woodrunner
+I also added:
+Battle equipment rosters
+Civilian equipment rosters
+Native weapons and shields
+No native head, legs, gloves, or cape entries
+I cleared only some of those slots and later all of them.
+Result:
+No visible preview change
+The Party Manager showed vanilla troops
+The native troop equipment appeared to remain the source used by the tableau
+Conclusion:
+spnpccharacters.xml did not reliably alter the Party Manager’s cached character preview.
+Attempt 2: Runtime Equipment Roster Mutation
+I added a campaign behavior that ran after the campaign session launched.
+For every catalog troop, it:
+Found the CharacterObject
+Found the matching meme ItemObject
+Iterated through:
+Battle equipment
+Civilian equipment
+Stealth equipment
+Replaced the body slot
+Cleared head, cape, gloves, and legs
+This applied the meme item to the live troop equipment lists.
+Result:
+Mission behavior continued working
+The Party Manager still showed the vanilla character
+The Party tableau seemed to ignore or overwrite the mutated rosters
+In one test, the equipment mutation produced no mesh and only floating weapons
+Conclusion:
+Mutating live campaign equipment rosters was not a reliable way to create a separate preview.
+It could also risk changing combat or save-visible equipment state, so it was removed.
+Attempt 3: Party-VM Property-Change Hook
+I located these Party VM classes:
+PartyVM
+PartyCharacterVM
+HeroViewModel
+I also found that the Party screen center model exposes:
+SelectedCharacter
+CurrentCharacter
+EquipmentCode
+SetEquipment(...)
+I attempted to:
+Detect when PartyVM.CurrentCharacter changed
+Detect when PartyVM.SelectedCharacter changed
+Find the selected troop
+Clone its first battle equipment
+Replace its body slot with the meme armor
+Clear other visual slots
+Call SelectedCharacter.SetEquipment(...)
+Update SelectedCharacter.EquipmentCode
+Enable SelectedCharacter.IsTableauEnabled
+I also refreshed this every campaign tick to overcome banner/tableau regeneration.
+Result:
+The methods ran
+Some equipment state appeared to update internally
+The rendered Party Manager character did not change
+It remained invisible, floating equipment, or vanilla
+Conclusion:
+The Party VM’s equipment fields are not necessarily the source used by the actual cached character tableau.
+Attempt 4: CharacterObject Clone
+I created a temporary CharacterObject clone for the selected troop and applied meme equipment to it.
+I then attempted to set the clone on the Party PartyCharacterVM.
+Result:
+The Party preview returned to the vanilla character
+The original troop remained untouched
+The click-selected preview was no longer based on the mutated clone
+Conclusion:
+Replacing PartyCharacterVM.Character with a temporary clone is not enough.
+The UI and renderer retain additional character and equipment inputs that are not fully represented by the clone.
+Attempt 5: Direct CharacterTableauWidget Update
+I located the actual widget used by PartyScreen.xml:
+TaleWorlds.MountAndBlade.GauntletUI.Widgets.CharacterTableauWidget
+I attempted to set:
+CharStringId
+EquipmentCode
+IsTableauEnabled
+I also searched the widget’s private fields and attempted to trigger the tableau refresh.
+Result:
+No visible change
+The rendered preview remained vanilla
+Updating the widget properties did not produce a new rendered character
+Conclusion:
+CharacterTableauWidget only provides the texture inputs.
+It is not the 3D AgentVisuals object that builds the character.
+Attempt 6: CharacterCode and Equipment-Code Round Trip
+I attempted to solve the cosmetic serialization possibility.
+For the selected troop:
+Clone the troop’s battle equipment
+Replace Body with EquipmentElement(memeItem) using the real item XML ID
+Clear the Head, Cape, Gloves, and Leg slots
+Call preview.CalculateEquipmentCode()
+Decode it using Equipment.CreateFromEquipmentCode(code)
+Verify the decoded Body item is the meme item
+Call SelectedCharacter.SetEquipment(decoded)
+Set EquipmentCode
+Enable the tableau
+I intentionally used Item, not CosmeticItem.
+Result:
+The preview code could be constructed
+The round-trip diagnostic could be added
+The selected view model could receive the equipment
+The Party 3D preview still remained vanilla or invisible
+Conclusion:
+The equipment-code round-trip was not enough to prove that the actual tableau AgentVisuals used the replacement.
+Attempt 7: Direct MetaMesh/AgentVisuals Experiment
+The next intended experiment was to patch or intercept the actual CharacterTableau refresh and add the meme MetaMesh to its MBAgentVisuals.
+The public API includes:
+MBAgentVisuals.AddMultiMesh(...)
+MBAgentVisuals.ClearVisualComponents(...)
+MBAgentVisuals.ReplaceMeshWithMesh(...)
+MBAgentVisuals.GetEntity()
+MetaMesh.CreateMetaMesh(...)
+However, the installed client assembly did not expose the known C# View.Tableaus.CharacterTableau class in the build scan.
+There was also no Harmony assembly already discoverable in the mod folder or installed client DLL scan.
+Therefore, no confirmed direct RefreshCharacterTableau postfix was implemented.
+Attempt 8: Supported NPC Roster Route
+Finally, I removed the campaign reflection behavior and put meme BodyArmor items directly into native NPC equipment rosters.
+This created:
+Battle and civilian rosters for the Looter
+Battle and civilian rosters for the Battanian Volunteer
+Battle and civilian rosters for the Battanian Wood Runner
+Meme body items with the native weapons retained
+Result:
+XML was valid
+The mod built successfully
+The Party Manager still showed vanilla troops
+This showed that standard NPC equipment XML does not reliably control the Party Manager’s cached 3D tableau
+Missing Details That Should Be Investigated First
+When retrying this later, collect these diagnostics:
+Whether the Party Manager selected-character equipment code round-trips to the custom body item.
+Whether memeItem.MultiMeshName is the exact generated mesh name.
+Whether MetaMesh.CreateMetaMesh(memeItem.MultiMeshName) is valid.
+Whether Bannerlord has a valid renderable MetaMesh at runtime.
+Whether the mesh is skinned to human_skeleton.
+Whether the Party tableau double-buffers its AgentVisuals.
+Which visual buffer is currently active.
+Whether the equipment is injected before or after RefreshCharacterTableau.
+Whether the old tableau texture remains cached.
+Whether BannerlordTableauManager needs a new render request.
+Whether the selected troop preview uses EquipmentCode or FirstBattleEquipment.
+Whether the preview has an animation action set compatible with the meme mesh.
+Likely Correct Next Direction
+The strongest remaining solution is to patch the actual tableau refresh rather than the Party VM or NPC XML.
+The intended process is:
+Patch CharacterTableau.RefreshCharacterTableau or the closest installed equivalent.
+Run vanilla refresh first.
+Detect which troop character is being rendered.
+Find the newly refreshed MBAgentVisuals.
+Clone or regenerate the equipment preview.
+Clear native visual components.
+Add the correct meme MetaMesh to the rendered visual.
+Preserve native weapons and shields.
+Apply it to the active tableau buffer.
+Invalidate or release the old tableau texture.
+Request or trigger a new render.
+The Only Real Invisibility Result
+The invisibility was produced by the same visual logic used in battle:
+Put the meme item in the Body slot.
+Clear Head, Leg, Gloves, and Cape.
+Preserve native weapon slots.
+Refresh the agent visual.
+In battle, this worked because BrainrotMissionBehavior:
+Found the Agent.Character.StringId
+Found the matching item ID
+Cloned agent.SpawnEquipment
+Added the meme item to EquipmentIndex.Body
+Cleared native visual slots
+Called agent.UpdateSpawnEquipmentAndRefreshVisuals(...)
+That produced the Shrek/Mike/Luigi character in missions.
+The Party Manager does not appear to call that mission-agent refresh path.
+Therefore, its preview is probably controlled by a separate AgentVisuals and character-tableau cache pipeline. The next solution must reach that pipeline directly, and it must distinguish between:
+The mission agent replacement, which is already working
+The Party character tableau preview, which is not
+
+
+### Stage 7: Expand the character library
 
 My workflow -
 Import the FBX and generated assets in the Bannerlord editor.
@@ -515,7 +673,7 @@ most character meshes have a shading bug that puts a sharp line down their face
 No way to tell what troops are on which side.
 
 
-### Stage 7: Package and maintain the release
+### Stage 8: Package and maintain the release
 1. Separate source assets, generated game assets, module files, and development-only files.
 2. Keep the release package limited to required runtime files.
 3. Document installation, load order, supported game version, removal procedure, and known limitations.
