@@ -14,6 +14,8 @@ Armor Stats & Hitboxes: Armor defense values and physical hitboxes remain unchan
 Weapons & Shields: Characters hold and use the default weapons/shields assigned to the troop (e.g., Vlandian sword and shield).
 Party-Manager tab: The meme characters must be shown as they are in battle, when previewed in the party manager tab.
 The Shaders showing the meme characters must look as good as possible. No sharp shader lines, or strange shading problems.
+Skin-Selection-Tree: The player will be able to select what skin he wants in the character equipment screen. It will not change any of his armor stats, and will just have a dropdown menu of the names of each meme model, of which you can choose from and change whenever.
+Troop trees- The troops will have the new meme names in the troop trees and the Party-Manager tab.
 3. Roles & Responsibilities
 3.1 3D Artist (My Responsibilities)
 I have extensive Blender experience (animating, rigging, prepping models, shading/material editing).

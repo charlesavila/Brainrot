@@ -1,0 +1,7 @@
+# Generated managed build output. Keep the deployed runtime DLLs in bin/Win64_*.
+/obj/
+/bin/Release/
+/bin/**/*.pdb
+
+# Incomplete editor cache writes. Completed .rdc files remain asset dependencies.
+/RuntimeDataCache/*.rtemp

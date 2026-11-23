@@ -11,9 +11,18 @@
   <PropertyGroup>
     <BannerlordRoot>C:\Program Files (x86)\Steam\steamapps\common\Mount &amp; Blade II Bannerlord</BannerlordRoot>
     <BannerlordClient>$(BannerlordRoot)\bin\Win64_Shipping_Client</BannerlordClient>
+    <BannerlordNativeClient>$(BannerlordRoot)\Modules\Native\bin\Win64_Shipping_Client</BannerlordNativeClient>
+    <HarmonyAssembly Condition="'$(HarmonyAssembly)' == '' And Exists('$(BannerlordRoot)\Modules\Bannerlord.Harmony\bin\Win64_Shipping_Client\0Harmony.dll')">$(BannerlordRoot)\Modules\Bannerlord.Harmony\bin\Win64_Shipping_Client\0Harmony.dll</HarmonyAssembly>
+    <HarmonyAssembly Condition="'$(HarmonyAssembly)' == ''">$(BannerlordRoot)\..\..\workshop\content\261550\2859188632\bin\Win64_Shipping_Client\0Harmony.dll</HarmonyAssembly>
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Compile against the installed Harmony module; it supplies the runtime DLL. -->
+    <Reference Include="0Harmony, Version=2.4.2.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>$(HarmonyAssembly)</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>true</SpecificVersion>
+    </Reference>
     <Reference Include="TaleWorlds.DotNet">
       <HintPath>$(BannerlordClient)\TaleWorlds.DotNet.dll</HintPath>
       <Private>false</Private>
@@ -38,5 +47,17 @@
       <HintPath>$(BannerlordClient)\TaleWorlds.ObjectSystem.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="TaleWorlds.ScreenSystem">
+      <HintPath>$(BannerlordClient)\TaleWorlds.ScreenSystem.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="TaleWorlds.MountAndBlade.View">
+      <HintPath>$(BannerlordNativeClient)\TaleWorlds.MountAndBlade.View.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
+
+  <Target Name="CheckHarmonyReference" BeforeTargets="ResolveReferences">
+    <Error Condition="!Exists('$(HarmonyAssembly)')" Text="Harmony was not found. Install the Harmony module, or build with /p:HarmonyAssembly=path-to-0Harmony.dll." />
+  </Target>
 </Project>
