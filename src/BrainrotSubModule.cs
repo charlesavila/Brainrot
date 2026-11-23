@@ -27,7 +27,7 @@ namespace Brainrot
             base.OnSubModuleLoad();
             Debug.Print("Brainrot: submodule loaded.");
             BrainrotPreviewLog.Start();
-            BrainrotPreviewLog.Write("Preview v3: large tableau and troop portraits; installation deferred until game actions are loaded.");
+            BrainrotPreviewLog.Write("Stage 7: hero skin selection; installation deferred until game actions are loaded.");
         }
 
         protected override void OnBeforeInitialModuleScreenSetAsRoot()
@@ -48,6 +48,8 @@ namespace Brainrot
             {
                 BrainrotPartyPreview.Install();
                 BrainrotTroopPortraits.Install();
+                BrainrotSkinSelector.Install();
+                BrainrotAgentBodyRenderer.Install();
             }
             catch (Exception exception)
             {
@@ -57,6 +59,8 @@ namespace Brainrot
 
         protected override void OnSubModuleUnloaded()
         {
+            BrainrotAgentBodyRenderer.Uninstall();
+            BrainrotSkinSelector.Uninstall();
             BrainrotTroopPortraits.Uninstall();
             BrainrotPartyPreview.Uninstall();
             base.OnSubModuleUnloaded();

@@ -34,9 +34,12 @@ try {
     $references = @(
         'System.Core.dll',
         'System.Xml.dll',
+        'System.Runtime.Serialization.dll',
         ([System.Reflection.Assembly]::Load('netstandard, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51').Location)
     )
     foreach ($name in @('TaleWorlds.Library', 'TaleWorlds.ObjectSystem', 'TaleWorlds.SaveSystem', 'TaleWorlds.Core',
+            'TaleWorlds.CampaignSystem', 'TaleWorlds.Core.ViewModelCollection', 'TaleWorlds.Localization',
+            'TaleWorlds.Engine.GauntletUI', 'TaleWorlds.GauntletUI', 'TaleWorlds.ScreenSystem',
             'TaleWorlds.DotNet', 'TaleWorlds.Engine', 'TaleWorlds.MountAndBlade',
             'TaleWorlds.MountAndBlade.View', 'SandBox.GauntletUI', '0Harmony', 'Brainrot')) {
         foreach ($directory in $assemblyDirectories) {
@@ -53,12 +56,14 @@ try {
     Add-Type -ReferencedAssemblies $references -TypeDefinition @'
 using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Xml;
 using HarmonyLib;
+using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
 using TaleWorlds.Core.ImageIdentifiers;
 using TaleWorlds.Engine;
@@ -71,6 +76,8 @@ public static class BrainrotPreviewChecks
 {
     private static readonly Type Preview = Assembly.Load("Brainrot").GetType("Brainrot.BrainrotPartyPreview", true);
     private static readonly Type Portraits = Assembly.Load("Brainrot").GetType("Brainrot.BrainrotTroopPortraits", true);
+    private static readonly Type Selector = Assembly.Load("Brainrot").GetType("Brainrot.BrainrotSkinSelector", true);
+    private static readonly Type Renderer = Assembly.Load("Brainrot").GetType("Brainrot.BrainrotAgentBodyRenderer", true);
     private const BindingFlags Hidden = BindingFlags.NonPublic | BindingFlags.Static;
     private static int SimulatedActionCount;
     private static int EarlyActionLookups;
@@ -97,6 +104,186 @@ public static class BrainrotPreviewChecks
     {
         if (!condition) throw new Exception(message);
         Console.WriteLine("PASS: " + message);
+    }
+
+    private static bool AcceptSkinFixture(ref bool __result) { __result = true; return false; }
+    private static bool FailSkinSave;
+    private static bool FakeSkinSave()
+    {
+        if (FailSkinSave) throw new IOException("Simulated preferences write failure");
+        return false;
+    }
+
+    private static void RunSkinChecks()
+    {
+        Assembly module = Preview.Assembly;
+        Type store = module.GetType("Brainrot.HeroSkinPreferences");
+        Type skins = module.GetType("Brainrot.BrainrotHeroSkins");
+        var heroesField = store.GetField("Heroes");
+        var campaignField = store.GetField("CampaignId");
+        var save = store.GetMethod("Save", BindingFlags.NonPublic | BindingFlags.Instance);
+        var load = store.GetMethod("Load", Hidden);
+        var pathMethod = store.GetMethod("FilePath", Hidden);
+        string directory = Path.Combine(Path.GetTempPath(), "BrainrotSkinChecks-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+        try
+        {
+            object data = Activator.CreateInstance(store, true);
+            campaignField.SetValue(data, "campaign/a");
+            var choices = (Dictionary<string, string>)heroesField.GetValue(data);
+            choices["player"] = "shrek";
+            choices["companion"] = "mike";
+            string path = (string)pathMethod.Invoke(null, new object[] { directory, "campaign/a" });
+            string otherPath = (string)pathMethod.Invoke(null, new object[] { directory, "campaign/b" });
+            Check(path != otherPath && Path.GetDirectoryName(path) == directory,
+                "Campaign preference paths are isolated and cannot escape the preferences directory");
+            save.Invoke(data, new object[] { directory });
+            object restored = load.Invoke(null, new object[] { directory, "campaign/a" });
+            var restoredChoices = (Dictionary<string, string>)heroesField.GetValue(restored);
+            Check(restoredChoices["player"] == "shrek" && restoredChoices["companion"] == "mike",
+                "Different hero skin selections survive a JSON save and reload");
+            Check(!File.ReadAllText(path).Contains("TaleWorlds") && File.ReadAllText(path).Contains("shrek"),
+                "Preferences contain only campaign, hero and skin identifiers, without saved game objects");
+            choices.Remove("player");
+            save.Invoke(data, new object[] { directory });
+            restored = load.Invoke(null, new object[] { directory, "campaign/a" });
+            Check(!((Dictionary<string, string>)heroesField.GetValue(restored)).ContainsKey("player") && File.Exists(path + ".bak"),
+                "Default restoration persists and atomic replacement preserves a previous preference file");
+            string validJson = File.ReadAllText(path);
+            File.WriteAllText(path, "invalid-json");
+            bool rejected = false;
+            try { load.Invoke(null, new object[] { directory, "campaign/a" }); }
+            catch (TargetInvocationException) { rejected = true; }
+            Check(rejected, "Corrupt preference files are rejected for the runtime default fallback");
+            File.WriteAllText(path, validJson);
+
+            var prefsField = AccessTools.Field(skins, "preferences");
+            var pendingField = AccessTools.Field(skins, "pending");
+            object previousPrefs = prefsField.GetValue(null), previousPending = pendingField.GetValue(null);
+            var mocks = new Harmony("Brainrot.PreviewChecks.SkinState");
+            mocks.Patch(AccessTools.Method(skins, "EnsureCampaign"), prefix: new HarmonyMethod(typeof(BrainrotPreviewChecks), "AcceptSkinFixture"));
+            mocks.Patch(AccessTools.Method(skins, "Eligible"), prefix: new HarmonyMethod(typeof(BrainrotPreviewChecks), "AcceptSkinFixture"));
+            mocks.Patch(save, prefix: new HarmonyMethod(typeof(BrainrotPreviewChecks), "FakeSkinSave"));
+            try
+            {
+                choices["player"] = "shrek";
+                prefsField.SetValue(null, data);
+                pendingField.SetValue(null, null);
+                var player = (Hero)FormatterServices.GetUninitializedObject(typeof(Hero)); player.StringId = "player";
+                var companion = (Hero)FormatterServices.GetUninitializedObject(typeof(Hero)); companion.StringId = "companion";
+                skins.GetMethod("Begin", Hidden).Invoke(null, null);
+                skins.GetMethod("Choose", Hidden).Invoke(null, new object[] { player, "luigi" });
+                var select = skins.GetMethod("Selection", Hidden);
+                Check((string)select.Invoke(null, new object[] { player }) == "luigi" &&
+                    (string)select.Invoke(null, new object[] { companion }) == "mike" && choices["player"] == "shrek",
+                    "Inventory preview choices are isolated per hero and leave committed choices unchanged");
+                skins.GetMethod("Reset", Hidden).Invoke(null, null);
+                Check((string)select.Invoke(null, new object[] { player }) == "shrek", "Inventory Reset restores the original skin selection");
+                skins.GetMethod("Choose", Hidden).Invoke(null, new object[] { player, "luigi" });
+                skins.GetMethod("End", Hidden).Invoke(null, null);
+                Check((string)select.Invoke(null, new object[] { player }) == "shrek", "Closing without a successful Done discards pending skin changes");
+                skins.GetMethod("Begin", Hidden).Invoke(null, null);
+                skins.GetMethod("Choose", Hidden).Invoke(null, new object[] { player, "luigi" });
+                skins.GetMethod("Commit", Hidden).Invoke(null, null);
+                skins.GetMethod("End", Hidden).Invoke(null, null);
+                Check((string)select.Invoke(null, new object[] { player }) == "luigi", "Successful inventory completion commits the selected skin");
+                skins.GetMethod("Begin", Hidden).Invoke(null, null);
+                skins.GetMethod("Choose", Hidden).Invoke(null, new object[] { player, "shrek" });
+                FailSkinSave = true;
+                try { skins.GetMethod("Commit", Hidden).Invoke(null, null); }
+                catch (TargetInvocationException) { }
+                skins.GetMethod("End", Hidden).Invoke(null, null);
+                Check((string)select.Invoke(null, new object[] { player }) == "luigi", "A failed preference write retains the last committed skin");
+                FailSkinSave = false;
+                skins.GetMethod("Begin", Hidden).Invoke(null, null);
+                Type skinType = skins.GetNestedType("Skin", BindingFlags.NonPublic);
+                var options = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(skinType));
+                foreach (string key in new[] { "shrek", "mike", "luigi" })
+                {
+                    object skin = Activator.CreateInstance(skinType, true);
+                    AccessTools.Field(skinType, "Id").SetValue(skin, key);
+                    AccessTools.Field(skinType, "Name").SetValue(skin, key);
+                    options.Add(skin);
+                }
+                Type vmType = module.GetType("Brainrot.BrainrotSkinSelectorVM");
+                object viewModel = Activator.CreateInstance(vmType, BindingFlags.NonPublic | BindingFlags.Instance, null, new object[] { options }, null);
+                var sync = vmType.GetMethod("Sync", BindingFlags.NonPublic | BindingFlags.Instance);
+                sync.Invoke(viewModel, new object[] { player });
+                var selectorProperty = vmType.GetProperty("SkinSelector");
+                object playerSelector = selectorProperty.GetValue(viewModel, null);
+                var index = playerSelector.GetType().GetProperty("SelectedIndex");
+                Check((int)index.GetValue(playerSelector, null) == 3, "Equipment dropdown initializes from the selected hero's saved skin");
+                index.SetValue(playerSelector, 1, null);
+                sync.Invoke(viewModel, new object[] { companion });
+                Check((int)index.GetValue(selectorProperty.GetValue(viewModel, null), null) == 2 &&
+                    (string)select.Invoke(null, new object[] { player }) == "shrek" &&
+                    (string)select.Invoke(null, new object[] { companion }) == "mike",
+                    "Switching equipment-screen characters cannot copy one hero's dropdown choice to another");
+                index.SetValue(selectorProperty.GetValue(viewModel, null), 0, null);
+                Check(select.Invoke(null, new object[] { companion }) == null,
+                    "Selecting Default appearance removes the current companion's cosmetic override");
+                skins.GetMethod("Reset", Hidden).Invoke(null, null);
+                sync.Invoke(viewModel, new object[] { companion });
+                Check((int)index.GetValue(selectorProperty.GetValue(viewModel, null), null) == 2,
+                    "The actual selector view model reflects inventory Reset without changing heroes");
+                ((TaleWorlds.Library.ViewModel)viewModel).OnFinalize();
+            }
+            finally
+            {
+                FailSkinSave = false;
+                mocks.UnpatchAll(mocks.Id);
+                prefsField.SetValue(null, previousPrefs);
+                pendingField.SetValue(null, previousPending);
+            }
+
+            var visualGetter = AccessTools.Method(Renderer, "GetVisualEquipment");
+            var bodyCalls = PatchProcessor.GetOriginalInstructions(visualGetter);
+            Check(!bodyCalls.Any(code => code.operand is MethodInfo && new[] { "set_SpawnEquipment", "UpdateSpawnEquipmentAndRefreshVisuals", "UpdateAgentProperties", "SetSkeleton", "ClearAllWeaponMeshes", "ClearVisualComponents", "GetUninitializedObject" }.Contains(((MethodInfo)code.operand).Name)),
+                "Visual equipment resolution never clears live components or writes combat equipment");
+            var skinBuilder = AccessTools.DeclaredMethod(typeof(Agent), "AddSkinMeshes", new[] { typeof(bool), typeof(bool), typeof(int) });
+            var missionScreen = AccessTools.TypeByName("TaleWorlds.MountAndBlade.View.Screens.MissionScreen");
+            var armorBuilder = AccessTools.DeclaredMethod(missionScreen, "TaleWorlds.MountAndBlade.IMissionListener.OnEquipItemsFromSpawnEquipment");
+            var spawnGetter = AccessTools.PropertyGetter(typeof(Agent), "SpawnEquipment");
+            var rewrite = Renderer.GetMethod("RewriteEquipmentReads", Hidden);
+            var skinOriginal = PatchProcessor.GetOriginalInstructions(skinBuilder);
+            var armorOriginal = PatchProcessor.GetOriginalInstructions(armorBuilder);
+            var skinRewritten = ((IEnumerable<CodeInstruction>)rewrite.Invoke(null, new object[] { skinOriginal, false })).ToList();
+            var armorRewritten = ((IEnumerable<CodeInstruction>)rewrite.Invoke(null, new object[] { armorOriginal, true })).ToList();
+            Check(skinRewritten.Count(code => code.Calls(visualGetter)) == skinOriginal.Count(code => code.Calls(spawnGetter)) &&
+                !skinRewritten.Any(code => code.Calls(spawnGetter)),
+                "Native skin generation reads the visual clone for coverage without changing its lifecycle");
+            Check(armorRewritten.Count(code => code.Calls(visualGetter)) == armorOriginal.Count(code => code.Calls(spawnGetter)) - 1 &&
+                armorRewritten.Count(code => code.Calls(spawnGetter)) == 1 &&
+                armorRewritten.Last(code => code.Calls(spawnGetter) || code.Calls(visualGetter)).Calls(spawnGetter),
+                "Native armor rendering uses the costume while its final armor-material read stays native");
+            Check(armorOriginal.Count == armorRewritten.Count && skinOriginal.Count == skinRewritten.Count,
+                "Rendering patches preserve all native instructions except the intended equipment calls");
+            bool unknownPatternRejected = false;
+            try { rewrite.Invoke(null, new object[] { new[] { new CodeInstruction(System.Reflection.Emit.OpCodes.Ret) }, true }); }
+            catch (TargetInvocationException error) { unknownPatternRejected = error.InnerException is MissingMethodException; }
+            Check(unknownPatternRejected, "An unrecognized native rendering pattern is rejected instead of silently patched");
+            var getterPatches = Harmony.GetPatchInfo(spawnGetter);
+            Check(getterPatches == null || !getterPatches.Owners.Contains("Brainrot.MissionVisuals"),
+                "The real Agent.SpawnEquipment getter is never patched globally");
+            var nativeEquip = AccessTools.DeclaredMethod(typeof(Agent), "EquipItemsFromSpawnEquipment",
+                new[] { typeof(bool), typeof(bool), typeof(bool), typeof(int) });
+            var equipPatches = Harmony.GetPatchInfo(nativeEquip);
+            Check(!equipPatches.Postfixes.Any(patch => patch.owner == "Brainrot.HeroSkinSelector"),
+                "The crashing post-equipment body rebuild callback is absent");
+            var beginCalls = PatchProcessor.GetOriginalInstructions(AccessTools.Method(Renderer, "BeginEquipment"));
+            Check(beginCalls.Any(code => code.Calls(AccessTools.Method(typeof(Agent), "SetCapeClothSimulator"))),
+                "Native equipment reconstruction drops the prior managed cape simulator reference");
+            var movie = new XmlDocument(); movie.Load(Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(module.Location))), "GUI", "Prefabs", "BrainrotSkinSelector.xml"));
+            Check(movie.SelectSingleNode("//AnimatedDropdownWidget[@DataSource='{SkinSelector}']") != null,
+                "Selector movie binds the native dropdown to the available skin list");
+            Check(movie.SelectSingleNode("//Widget[@IsVisible='@IsVisible' and @MarginTop='230']") != null,
+                "Skin selector is positioned below the inventory mode controls");
+        }
+        finally
+        {
+            foreach (string file in Directory.GetFiles(directory)) File.Delete(file);
+            Directory.Delete(directory);
+        }
     }
 
     public static void Run()
@@ -211,14 +398,22 @@ public static class BrainrotPreviewChecks
             SimulatedActionCount = 0;
             Preview.GetMethod("Install", Hidden).Invoke(null, null);
             Portraits.GetMethod("Install", Hidden).Invoke(null, null);
+            Selector.GetMethod("Install", Hidden).Invoke(null, null);
+            Renderer.GetMethod("Install", Hidden).Invoke(null, null);
             Check(!Harmony.GetAllPatchedMethods().Any(method => Harmony.GetPatchInfo(method).Owners.Contains("Brainrot.PartyPreview")),
                 "Empty native action table prevents every preview hook from being installed");
             Check(!Harmony.GetAllPatchedMethods().Any(method => Harmony.GetPatchInfo(method).Owners.Contains("Brainrot.TroopPortraits")),
                 "Portrait hooks also wait for the preview startup readiness checks");
+            Check(!Harmony.GetAllPatchedMethods().Any(method => Harmony.GetPatchInfo(method).Owners.Contains("Brainrot.HeroSkinSelector")),
+                "Hero selector hooks wait for the same safe startup point");
+            Check(!Harmony.GetAllPatchedMethods().Any(method => Harmony.GetPatchInfo(method).Owners.Contains("Brainrot.MissionVisuals")),
+                "Mission rendering hooks also wait until native actions are ready");
             Check(EarlyActionLookups == 0, "Deferred installation never initializes action IDs against an empty table");
             SimulatedActionCount = 5000;
             Preview.GetMethod("Install", Hidden).Invoke(null, null);
             Portraits.GetMethod("Install", Hidden).Invoke(null, null);
+            Selector.GetMethod("Install", Hidden).Invoke(null, null);
+            Renderer.GetMethod("Install", Hidden).Invoke(null, null);
             var cacheType = typeof(MBAnimation).Assembly.GetType("TaleWorlds.MountAndBlade.ActionIndexCache");
             object cachedIdle = cacheType.GetField("act_inventory_idle").GetValue(null);
             Check((int)cacheType.GetProperty("Index").GetValue(cachedIdle, null) == 7 && EarlyActionLookups == 0,
@@ -240,6 +435,18 @@ public static class BrainrotPreviewChecks
                 "Troop-tree portrait hook is installed on the shared native character-code factory");
             Check(Harmony.GetPatchInfo(partyFactory).Owners.Contains("Brainrot.TroopPortraits"),
                 "Party list and upgrade portrait hook is installed on the actual party character-code factory");
+            var screenType = AccessTools.TypeByName("SandBox.GauntletUI.GauntletInventoryScreen");
+            var logicType = typeof(Campaign).Assembly.GetType("TaleWorlds.CampaignSystem.Inventory.InventoryLogic");
+            foreach (var target in new[] { AccessTools.DeclaredMethod(screenType, "OnFrameTick"),
+                AccessTools.DeclaredMethod(screenType, "OnFinalize"), AccessTools.DeclaredMethod(logicType, "DoneLogic"),
+                AccessTools.DeclaredMethod(logicType, "Reset") })
+                Check(Harmony.GetPatchInfo(target).Owners.Contains("Brainrot.HeroSkinSelector"), "Stage 7 native hook installed: " + target.Name);
+            foreach (var target in new[] { AccessTools.DeclaredMethod(typeof(Agent), "AddSkinMeshes", new[] { typeof(bool), typeof(bool), typeof(int) }),
+                AccessTools.DeclaredMethod(AccessTools.TypeByName("TaleWorlds.MountAndBlade.View.Screens.MissionScreen"),
+                    "TaleWorlds.MountAndBlade.IMissionListener.OnEquipItemsFromSpawnEquipment"),
+                AccessTools.DeclaredMethod(typeof(Agent), "EquipItemsFromSpawnEquipment", new[] { typeof(bool), typeof(bool), typeof(bool), typeof(int) }) })
+                Check(Harmony.GetPatchInfo(target).Owners.Contains("Brainrot.MissionVisuals"), "Native mission rendering hook installed: " + target.Name);
+            RunSkinChecks();
             var campaignVm = partyFactory.DeclaringType.Assembly;
             var unitVm = campaignVm.GetType("TaleWorlds.CampaignSystem.ViewModelCollection.Encyclopedia.Items.EncyclopediaUnitVM");
             var unitConstructor = unitVm.GetConstructors().Single();
@@ -255,7 +462,7 @@ public static class BrainrotPreviewChecks
             AccessTools.Field(typeof(BasicCharacterObject), "_isBasicHero").SetValue(hero, true);
             var heroArguments = new object[] { hero, characterFactory, nativeCode };
             portraitPostfix.Invoke(null, heroArguments);
-            Check(ReferenceEquals(heroArguments[2], nativeCode), "Hero portraits retain their original image data even when their ID matches a troop mapping");
+            Check(ReferenceEquals(heroArguments[2], nativeCode), "Unselected hero portraits retain native data even when their ID matches a troop mapping");
 
             var configField = AccessTools.Field(Preview.Assembly.GetType("Brainrot.BrainrotSubModule"), "replacementConfig");
             object savedConfig = configField.GetValue(null);
@@ -303,6 +510,8 @@ public static class BrainrotPreviewChecks
         }
         finally
         {
+            Renderer.GetMethod("Uninstall", Hidden).Invoke(null, null);
+            Selector.GetMethod("Uninstall", Hidden).Invoke(null, null);
             Portraits.GetMethod("Uninstall", Hidden).Invoke(null, null);
             Preview.GetMethod("Uninstall", Hidden).Invoke(null, null);
             mocks.UnpatchAll(mocks.Id);
@@ -311,6 +520,10 @@ public static class BrainrotPreviewChecks
             "Unloading removes Brainrot preview hooks");
         Check(!Harmony.GetAllPatchedMethods().Any(method => Harmony.GetPatchInfo(method).Owners.Contains("Brainrot.TroopPortraits")),
             "Unloading removes Brainrot portrait hooks");
+        Check(!Harmony.GetAllPatchedMethods().Any(method => Harmony.GetPatchInfo(method).Owners.Contains("Brainrot.HeroSkinSelector")),
+            "Unloading removes the inventory selector hooks");
+        Check(!Harmony.GetAllPatchedMethods().Any(method => Harmony.GetPatchInfo(method).Owners.Contains("Brainrot.MissionVisuals")),
+            "Unloading removes the native mission rendering hooks");
     }
 }
 '@

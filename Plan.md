@@ -654,8 +654,97 @@ Therefore, its preview is probably controlled by a separate AgentVisuals and cha
 The mission agent replacement, which is already working
 The Party character tableau preview, which is not
 
+### Stage 7: player Skin-Selection-Tree
 
-### Stage 7: Expand the character library
+Goal - The player will be able to select what skin he wants in the character equipment screen. It will not change any of his armor stats, and will just have a dropdown menu of the names of each meme model, of which you can choose from and change whenever from the character equipment screen. I would like this to work for companions aswell.
+
+**Implementation plan**
+
+1. **Confirm the equipment-screen integration and preserve the working baseline.**
+   - Inspect the installed inventory/equipment screen's view model, character-switching controls, preview renderer, and open/close lifecycle before choosing hook targets. The dropdown belongs beside the currently displayed character's equipment and appearance preview.
+   - Back up the accepted battle, Party Manager, and portrait implementation. Keep the late Harmony initialization and animation-readiness checks that fixed the folded-pose problem.
+   - Scope the first version to the player and companions the player can equip. Do not expose changes for merchants, enemies, or unrelated heroes shown by other screens.
+
+2. **Create one reusable list of available skins.**
+   - Populate the dropdown from the existing character catalog and registered costume items, using stable character IDs internally and readable model names in the UI. Do not hard-code a separate list in C# or require a troop mapping change to select a skin for a hero.
+   - Include a `Default appearance` option that restores the hero's normal body and equipped armor visuals.
+   - Validate the item and imported mesh before offering a skin. Log unavailable entries and safely retain the default appearance if a selected asset is later removed or renamed.
+
+3. **Store selections independently for each eligible hero.**
+   - Resolve the actual hero currently displayed by the equipment screen. Store the selected character key against that hero's stable identity; the player and each companion must be able to choose different skins.
+   - Keep an explicit hero-selection resolver separate from the existing native-troop replacement resolver. An unselected hero keeps their default appearance; choosing a companion skin must not change every troop with a similar name or equipment set.
+   - Refresh the dropdown and preview when switching characters. Guard against UI binding updates accidentally applying the previous character's choice to the next one.
+
+4. **Prove that applying a skin changes only rendering.**
+   - Reuse the accepted costume coverage and visual-slot clearing rules for previews: replace the body in a separate visual equipment copy, hide native head/cape/glove/leg meshes, and preserve native weapons and shields.
+   - Audit the live-agent application path before extending it to heroes. A cloned equipment object alone does not prove armor calculations are preserved; verify whether the selected refresh API changes the agent's combat equipment or cached armor values. Use a rendering-only path if it does.
+   - Leave the hero's real battle/civilian equipment, inventory, item modifiers, weight/encumbrance, armor values, stats, skeleton, and hitboxes intact. Do not implement selection by equipping or granting costume items to the player or companion.
+
+5. **Add the dropdown with immediate preview and clear confirmation behavior.**
+   - Selecting a skin immediately updates the current character's equipment-screen preview. Selecting `Default appearance` reverses that preview without requiring an equipment change.
+   - Track pending selections per hero for the current screen session. Commit them when the equipment screen is confirmed; discard them when the screen is canceled. Verify the installed screen's actual confirmation/cancellation behavior and handle other close paths explicitly.
+   - Support repeated changes and character switching without duplicate controls, repeated event subscriptions, or per-frame equipment replacement. Use the screen's UI lifecycle and change notifications.
+
+6. **Apply confirmed selections consistently across character views.**
+   - Extend the shared appearance resolver so explicitly selected player/companion skins appear in missions, the equipment preview, the Party Manager's large display, and relevant hero portraits. Cover battle and civilian contexts where those heroes are displayed.
+   - The existing portrait code deliberately skips heroes. Change that rule only for heroes with an explicit selection; preserve native portraits for all other heroes, including undiscovered/hidden-character placeholders.
+   - Give changed hero portraits equipment-bearing cache keys and refresh the affected UI after a selection changes. Verify already-created mission agents and regenerated visuals pick up the confirmed choice, and switching back to default removes the previous mesh completely.
+
+7. **Persist cosmetic preferences without making saves depend on the mod.**
+   - Prefer a small versioned JSON preferences file outside the module, under the user's local application data, containing only campaign/profile identity, hero IDs, and character keys. Do not serialize custom item, troop, or hero objects into campaign saves.
+   - First verify a stable campaign identifier available in this installation. Define how save copies and branches share preferences, and avoid using a filename alone or mixing unrelated campaigns. If independent preferences per save branch are required, agree that behavior before implementing persistence.
+   - Write preferences safely when the screen is confirmed. Missing files mean default appearances; invalid records, missing heroes, and removed skins fall back safely with diagnostics. Disabling or removing Brainrot leaves native saves loadable and normal appearances available.
+
+8. **Validate the complete player-and-companion workflow.**
+   - Check different skins on the player and at least two companions; repeated changes; character switching; confirmation/cancellation; default restoration; clean relaunch; and existing-save loading.
+   - Check inventory, Party Manager, portraits, battles, civilian scenes, mounted animations, weapons/shields, and death visuals. Recheck the accepted NPC troop replacements and normal poses on unmapped characters.
+   - Compare actual equipment, armor, encumbrance, and damage behavior before and after selection, including changing real armor while a skin is active. Confirm no costume items enter inventories or equipment rosters.
+   - Add meaningful managed checks for selection isolation, removed-skin fallback, persistence, and preview data. The user verifies rendered results and combat preservation in-game.
+   - Complete Stage 7 when the player and companions can choose and reset their skins through the equipment-screen dropdown, confirmed choices survive relaunch, all supported views agree, and save/removal compatibility and native combat values are verified.
+
+**Stage 7 implementation - selector accepted; revised battle rendering awaiting testing**
+
+- Added `GUI/Prefabs/BrainrotSkinSelector.xml`, loaded as an additional movie in the existing inventory Gauntlet layer. It uses the native scrollable dropdown and appears at the top center of the equipment screen as `Meme appearance`. After the first user test it was lowered from a top margin of 175 to 230 to clear the inventory mode controls.
+- `BrainrotSkinSelector.cs` tracks the inventory screen and selected character. It offers `Default appearance` plus validated catalog skins for the main hero and player companions, and follows native character switching. Reset restores pending selections; native `InventoryLogic.DoneLogic` commits only on success; finalization discards remaining pending changes and releases the additional movie. The native cancel path resets before calling Done, so it saves the original choices.
+- `BrainrotHeroSkins.cs` resolves explicit selections per hero. `display_name` may optionally override a catalog entry's dropdown label; otherwise the costume item's name is used. A catalog character may be available for hero selection without having an NPC troop mapping.
+- `HeroSkinPreferences.cs` stores a versioned JSON sidecar under `%LOCALAPPDATA%/Brainrot/HeroSkins/`, using a hash of the installed `Campaign.UniqueGameId` for the filename. Only campaign IDs, hero IDs and character keys are written. Save branches from the same campaign intentionally share appearance preferences; unrelated campaigns use separate files. Writes use a temporary file followed by atomic replacement, retaining a `.bak` of the previous preferences.
+- Extended the existing tableau and portrait hooks for explicitly selected heroes. Inventory previews refresh when choices change, including resetting to default. Unselected heroes and hidden portrait placeholders keep native image data. NPC mappings continue to use the established catalog.
+- The API audit confirmed `Agent.UpdateSpawnEquipmentAndRefreshVisuals` changes `SpawnEquipment`, rebuilds mission equipment and recalculates agent properties. It remains removed from Brainrot's replacement path. The initial Stage 7 adapter borrowed menu-preview mesh builders and cleared body components after native equipment construction; the user's first battle tests crashed with and without a selected hero skin. That adapter and its post-equipment rebuild callback were removed. The replacement described below stays inside the native skin/armor construction lifecycle and does not assign cosmetic equipment to the actual agent.
+- Startup remains deferred until native actions are loaded. Existing previews, portrait hooks, the new inventory hooks and agent refresh hooks are checked against the installed game/Harmony assemblies. Backups of the pre-Stage-7 implementation are under `%LOCALAPPDATA%/Brainrot/Backups/Stage7-20261122-203110/`.
+
+**Developer validation**
+
+The Release build and managed regression checks pass. Checks cover existing troop mappings and previews, delayed startup, actual native hook installation, JSON save/reload and atomic replacement, independent hero choices, cancellation/reset/commit, failed writes, character switching through the actual selector view model, default restoration, and the body renderer's absence of combat-equipment/skeleton/weapon-mesh replacement calls. They do not substitute for testing native rendering or the in-game UI layout.
+
+**User test checklist**
+
+1. Fully restart Bannerlord with Harmony before Brainrot, then load the existing test save and open Inventory/Equipment with I.
+2. Find `Meme appearance` near the top center. Select a skin for the player and check the immediate 3D preview. Confirm with Done, reopen, and verify the selected name remains.
+3. Switch to two companions and give each a different skin. Switch repeatedly between characters and confirm their dropdown selections and previews remain independent.
+4. Change a selection and cancel the screen; reopen and check the previous confirmed choice. Also test the inventory Reset button and `Default appearance` followed by Done.
+5. Check the player and companions in Party Manager, their portraits, a battle, and a civilian scene. Check mounted/weapon/shield animations and death visuals where practical. Recheck NPC troop replacement bodies, poses and weapons after the rendering-path change.
+6. Compare real armor slots, armor values and encumbrance with and without a skin. Change actual armor while a skin is active and confirm its normal stats still apply. Test combat behavior; ensure no costume items were added to inventory or real equipment.
+7. Save, fully relaunch and load again to verify preferences persist. Check a separate campaign for default choices, and check disabling/removing Brainrot against the existing save as part of the compatibility pass.
+
+Diagnostics remain in `%LOCALAPPDATA%/Brainrot/party-preview.log`; relevant entries include `Stage 7`, `skin selector movie loaded`, `Hero skin choices saved`, and `Mission body applied`. Preserve the log before relaunching if the dropdown is missing, a selection is lost, or a character renders incorrectly.
+
+**First Stage 7 user test and battle-crash revision**
+
+The user confirmed the selector works as intended, with its original placement slightly overlapping the controls above it. Entering battle crashed regardless of whether a personal skin was selected. The log showed mission body rebuilds before the crash; the native watchdog recorded a crash, but dump/report generation was canceled, so the exact native faulting instruction is not available. The post-construction rebuild's handling of native body/cloth state is the leading cause identified by code inspection, pending the next battle test.
+
+The revised `BrainrotAgentBodyRenderer` installs three late-initialized native-lifecycle hooks:
+
+- In `Agent.AddSkinMeshes`, equipment reads used to generate skin coverage read a separate visual equipment clone.
+- In `MissionScreen.IMissionListener.OnEquipItemsFromSpawnEquipment`, geometry reads use the same clone. The final read for body armor material remains native, preserving its sounds/impact-material behavior. Every native instruction other than those selected equipment getter calls is retained.
+- At the beginning of native `Agent.EquipItemsFromSpawnEquipment`, the visual lookup cache is invalidated and the previous managed cape-simulator reference is dropped before the engine clears/rebuilds components. The native armor builder registers the replacement simulator when needed. The actual `Agent.SpawnEquipment` getter is never globally patched and the actual equipment reference is never replaced.
+
+NPC replacements and initial hero appearances are now built by the engine's normal spawn path. The mission behavior no longer clears/adds meshes on agent build or forcibly rebuilds NPCs afterward. It watches only already-built, active hero agents for an actual appearance change; those changes call native equipment construction using the unchanged real equipment and existing mission weapon data. Native property recalculation therefore sees real armor, while the two visual construction methods see the costume clone.
+
+The managed checks now verify the installed rendering call patterns, exact replacement counts, retention of the last native armor-material read, preservation of instruction count, rejection of unknown patterns, absence of a global equipment getter patch, removal of the former post-equipment rebuild callback, cape reference reset, and the lowered selector position. The previous preference, selector, portrait and equipment-isolation checks remain. Native battle stability still requires the user's next test.
+
+The failing DLL, source and logs are preserved under `%LOCALAPPDATA%/Brainrot/Backups/Stage7-battle-crash-20261122-210143/`. The revised startup log includes `Mission visuals v2`; successful native appearance construction logs `Native mission appearance built` with `source-unchanged=True`. First test entering battle with `Default appearance`, then a selected player/companion skin, and recheck NPC bodies, weapons, armor values and the selector placement.
+
+### Stage 8: Expand the character library
 
 My workflow -
 Import the FBX and generated assets in the Bannerlord editor.
@@ -674,7 +763,7 @@ Squidward is having his mesh fly everywhere in a crazy glitchy way.
 No way to tell what troops are on which side.
 
 
-### Stage 8: Package and maintain the release
+### Stage 9: Package and maintain the release
 1. Separate source assets, generated game assets, module files, and development-only files. (remove mike_items.xml and integrate him into the character_replacement.xml and/or meme_characters.xml)
 2. Keep the release package limited to required runtime files.
 3. Document installation, load order, supported game version, removal procedure, and known limitations.

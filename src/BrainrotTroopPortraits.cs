@@ -58,14 +58,24 @@ namespace Brainrot
         private static void AfterCharacterCode([HarmonyArgument(0)] BasicCharacterObject character,
             MethodBase __originalMethod, ref CharacterCode __result)
         {
-            // Keep native identity, equipment rosters and hero portraits untouched. Only replace
-            // the transient image description while the caller still has the troop identity.
-            if (character == null || character.IsHero || __result == null || __result.IsEmpty) return;
+            // Replace only the transient image description. Heroes require an explicit personal
+            // choice; NPC troops use their catalog mapping. Hidden placeholders stay empty.
+            if (character == null || __result == null || __result.IsEmpty) return;
 
             try
             {
-                if (!BrainrotPartyPreview.TryGetReplacement(character.StringId, out string itemId)) return;
-                ItemObject item = MBObjectManager.Instance.GetObject<ItemObject>(itemId);
+                ItemObject item;
+                string itemId;
+                if (character.IsHero)
+                {
+                    if (!BrainrotHeroSkins.TryGetItem(character, out item)) return;
+                    itemId = item.StringId;
+                }
+                else
+                {
+                    if (!BrainrotPartyPreview.TryGetReplacement(character.StringId, out itemId)) return;
+                    item = MBObjectManager.Instance.GetObject<ItemObject>(itemId);
+                }
                 if (item == null || item.ArmorComponent == null || string.IsNullOrWhiteSpace(item.MultiMeshName))
                 {
                     ReportOnce("Portrait item unavailable: troop=" + character.StringId + "; item=" + itemId);

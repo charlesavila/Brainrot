@@ -17,6 +17,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="TaleWorlds.CampaignSystem"><HintPath>$(BannerlordClient)\TaleWorlds.CampaignSystem.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="TaleWorlds.Core.ViewModelCollection"><HintPath>$(BannerlordClient)\TaleWorlds.Core.ViewModelCollection.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="TaleWorlds.Localization"><HintPath>$(BannerlordClient)\TaleWorlds.Localization.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="TaleWorlds.Engine.GauntletUI"><HintPath>$(BannerlordClient)\TaleWorlds.Engine.GauntletUI.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="TaleWorlds.GauntletUI"><HintPath>$(BannerlordClient)\TaleWorlds.GauntletUI.dll</HintPath><Private>false</Private></Reference>
     <!-- Compile against the installed Harmony module; it supplies the runtime DLL. -->
     <Reference Include="0Harmony, Version=2.4.2.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>$(HarmonyAssembly)</HintPath>

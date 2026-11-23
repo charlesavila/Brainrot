@@ -11,6 +11,8 @@ namespace Brainrot
         private readonly Dictionary<string, string> replacements =
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
+        internal readonly HashSet<string> CharacterIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
         public IReadOnlyDictionary<string, string> Replacements
         {
             get
@@ -47,6 +49,8 @@ namespace Brainrot
                 string characterId = element.GetAttribute("id").Trim();
                 string meshName = element.GetAttribute("mesh").Trim();
                 string troopId = element.GetAttribute("troop_id").Trim();
+                if (!string.IsNullOrWhiteSpace(characterId) && !string.IsNullOrWhiteSpace(meshName))
+                    config.CharacterIds.Add(characterId);
                 if (string.IsNullOrWhiteSpace(characterId) ||
                     string.IsNullOrWhiteSpace(meshName) || string.IsNullOrWhiteSpace(troopId))
                 {
@@ -73,7 +77,7 @@ namespace Brainrot
             return replacements.TryGetValue(troopId, out itemId);
         }
 
-        private static string FindConfigPath(string fileName)
+        internal static string FindConfigPath(string fileName)
         {
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
             string[] candidates =

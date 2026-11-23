@@ -30,6 +30,9 @@ namespace Brainrot
         private static FieldInfo visualsDirty;
         private static FieldInfo agentVisuals;
         private static FieldInfo oldAgentVisuals;
+        private sealed class HeroRefresh { internal string Id; internal int Revision = -1; }
+        private static readonly ConditionalWeakTable<CharacterTableau, HeroRefresh> HeroRefreshes =
+            new ConditionalWeakTable<CharacterTableau, HeroRefresh>();
 
         internal static bool IsInstalled => harmony != null;
 
@@ -87,6 +90,7 @@ namespace Brainrot
                     prefix: Patch(nameof(BeforeCharacterChange)),
                     postfix: Patch(nameof(AfterCharacterChange)));
                 harmony.Patch(RequireMethod(tableauType, "OnTick", new[] { typeof(float) }),
+                    prefix: Patch(nameof(BeforeTableauTick)),
                     postfix: Patch(nameof(AfterTableauTick)));
                 BrainrotPreviewLog.Write("Hooks installed: InitializeAgentVisuals, " +
                     "RefreshCharacterTableau(Equipment oldEquipment), SetCharStringID, OnTick. " +
@@ -182,12 +186,16 @@ namespace Brainrot
             try
             {
                 string troopId = characterId.GetValue(__instance) as string;
-                if (!IsSelectedPartyTableau(troopId) || !TryGetReplacement(troopId, out string itemId))
+                var heroCharacter = BrainrotHeroSkins.Character(troopId);
+                ItemObject item;
+                string itemId;
+                if (BrainrotHeroSkins.TryGetItem(heroCharacter, out item)) itemId = item.StringId;
+                else
                 {
-                    return;
+                    if (heroCharacter?.IsHero == true || !IsSelectedPartyTableau(troopId) ||
+                        !TryGetReplacement(troopId, out itemId)) return;
+                    item = MBObjectManager.Instance.GetObject<ItemObject>(itemId);
                 }
-
-                ItemObject item = MBObjectManager.Instance.GetObject<ItemObject>(itemId);
                 if (item == null || item.ArmorComponent == null || string.IsNullOrWhiteSpace(item.MultiMeshName))
                 {
                     ReportOnce("Invalid preview item for " + troopId + ": " + itemId);
@@ -322,12 +330,28 @@ namespace Brainrot
             }
         }
 
+        private static void BeforeTableauTick(CharacterTableau __instance)
+        {
+            try
+            {
+                string id = characterId.GetValue(__instance) as string;
+                if (!BrainrotHeroSkins.Eligible(BrainrotHeroSkins.Character(id)?.HeroObject)) return;
+                var state = HeroRefreshes.GetValue(__instance, _ => new HeroRefresh());
+                if (state.Id == id && state.Revision == BrainrotHeroSkins.Revision) return;
+                state.Id = id;
+                state.Revision = BrainrotHeroSkins.Revision;
+                visualsDirty.SetValue(__instance, true);
+            }
+            catch (Exception error) { ReportOnce("Hero preview refresh failed: " + error); }
+        }
+
         private static void AfterTableauTick(CharacterTableau __instance)
         {
             if (!Pending.TryGetValue(__instance, out PreviewBuild build)) return;
             try
             {
-                if (!IsSelectedPartyTableau(build.TroopId))
+                if (!IsSelectedPartyTableau(build.TroopId) &&
+                    !BrainrotHeroSkins.Eligible(BrainrotHeroSkins.Character(build.TroopId)?.HeroObject))
                 {
                     Pending.Remove(__instance);
                     return;
