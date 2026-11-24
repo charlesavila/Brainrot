@@ -27,7 +27,7 @@
   <Character id="pepsiman"
              display_name="Pepsi Man"
              mesh="pepsimanmesh"
-             troop_id="mercenary_7" />
+             troop_id="sea_raiders_bandit" />
   <Character id="steve"
              display_name="Steve"
              mesh="steve"
@@ -61,7 +61,7 @@
              mesh="sheen"
              troop_id="vlandian_crossbowman" />
 <Character id="Fortnite"
-             display_name="Fortnite Black Knight"
+             display_name="Fortnite Black Guy"
              mesh="fortniteblack"
              troop_id="aserai_recruit" />
 <Character id="Homer_Simpson"
@@ -110,11 +110,11 @@
              troop_id="vlandian_pikeman" />
 <Character id="Barry_B_Benson"
              display_name="Barry B. Benson"
-             mesh="barrybbenson"
+             mesh="barrybbension"
              troop_id="vlandian_spearman" />
 <Character id="Waluigi"
              display_name="Waluigi"
-             mesh="waluigi"
+             mesh="waluigimesh"
              troop_id="battanian_raider" />
 <Character id="Dr_Phil"
              display_name="Dr. Phil"
