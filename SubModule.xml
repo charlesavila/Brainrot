@@ -1,12 +1,13 @@
 <Module>
 	<Name value="Brainrot"/>
 	<Id value="Brainrot"/>
-	<Version value="e1.5.2"/>
+	<Version value="v1.5.7.125802"/>
 	<DefaultModule value="false"/>
 	<ModuleCategory value="Singleplayer"/>
+	<ModuleType value="Community"/>
 	<Official value="false"/>
 	<DependedModules>
-		<DependedModule Id="Bannerlord.Harmony"/>
+		<DependedModule Id="Bannerlord.Harmony" DependentVersion="v2.4.2"/>
 		<DependedModule Id="Native"/>
 		<DependedModule Id="SandBoxCore"/>
 		<DependedModule Id="Sandbox"/>

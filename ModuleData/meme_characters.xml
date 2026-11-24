@@ -211,7 +211,7 @@
     </ItemComponent>
   </Item>
   <Item id="Sheen_body_armor"
-        name="Sheen Costume"
+        name="Sheen Estevez Costume"
         mesh="sheen"
         culture="Culture.vlandia"
         weight="0"
@@ -226,7 +226,7 @@
     </ItemComponent>
   </Item>
   <Item id="Fortnite_body_armor"
-        name="Fortnite Costume"
+        name="Fortnite Black Knight Costume"
         mesh="fortniteblack"
         culture="Culture.aserai"
         weight="0"
@@ -256,7 +256,7 @@
     </ItemComponent>
   </Item>
   <Item id="Spongebob_body_armor"
-        name="Spongebob Costume"
+        name="SpongeBob Costume"
         mesh="spongebob"
         culture="Culture.battania"
         weight="0"
@@ -271,7 +271,7 @@
     </ItemComponent>
   </Item>
   <Item id="Patrick_body_armor"
-        name="Patrick Costume"
+        name="Patrick Star Costume"
         mesh="patrick"
         culture="Culture.battania"
         weight="0"
@@ -358,6 +358,90 @@
              covers_body="true" covers_legs="true"
              covers_head="true" covers_hands="true"
              modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="Herobrine_body_armor" name="Herobrine Costume" mesh="herobrine"
+        culture="Culture.vlandia" weight="0" appearance="1" is_merchandise="true" Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0" covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true" modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="Angry_Bird_body_armor" name="Angry Bird Costume" mesh="angrybird"
+        culture="Culture.vlandia" weight="0" appearance="1" is_merchandise="true" Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0" covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true" modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="Flappy_Bird_body_armor" name="Flappy Bird Costume" mesh="flappybird"
+        culture="Culture.vlandia" weight="0" appearance="1" is_merchandise="true" Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0" covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true" modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="Barry_B_Benson_body_armor" name="Barry B. Benson Costume" mesh="barrybbenson"
+        culture="Culture.vlandia" weight="0" appearance="1" is_merchandise="true" Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0" covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true" modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="Waluigi_body_armor" name="Waluigi Costume" mesh="waluigi"
+        culture="Culture.battania" weight="0" appearance="1" is_merchandise="true" Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0" covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true" modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="Dr_Phil_body_armor" name="Dr. Phil Costume" mesh="drphil"
+        culture="Culture.battania" weight="0" appearance="1" is_merchandise="true" Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0" covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true" modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="Barbarian_body_armor" name="Barbarian Costume" mesh="barbarian"
+        culture="Culture.battania" weight="0" appearance="1" is_merchandise="true" Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0" covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true" modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="Big_Bird_body_armor" name="Big Bird Costume" mesh="bigbird"
+        culture="Culture.vlandia" weight="0" appearance="1" is_merchandise="true" Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0" covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true" modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="Big_Chungus_body_armor" name="Big Chungus Costume" mesh="bigchungus"
+        culture="Culture.sturgia" weight="0" appearance="1" is_merchandise="true" Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0" covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true" modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="Chicken_Little_body_armor" name="Chicken Little Costume" mesh="chickenlittle"
+        culture="Culture.sturgia" weight="0" appearance="1" is_merchandise="true" Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0" covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true" modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="CSGO_Terrorist_body_armor" name="CS:GO Terrorist Costume" mesh="csgo"
+        culture="Culture.aserai" weight="0" appearance="1" is_merchandise="true" Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0" covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true" modifier_group="cloth" material_type="Cloth" />
+    </ItemComponent>
+  </Item>
+  <Item id="Dio_body_armor" name="Dio Costume" mesh="dio"
+        culture="Culture.khuzait" weight="0" appearance="1" is_merchandise="true" Type="BodyArmor">
+    <ItemComponent>
+      <Armor body_armor="0" leg_armor="0" arm_armor="0" covers_body="true" covers_legs="true"
+             covers_head="true" covers_hands="true" modifier_group="cloth" material_type="Cloth" />
     </ItemComponent>
   </Item>
 </Items>
