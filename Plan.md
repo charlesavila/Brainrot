@@ -527,6 +527,10 @@ Add the mesh to ModuleData/meme_characters.xml as a BodyArmor item.
 Add matching <Character ... /> entry to ModuleData/character_replacements.xml.
 Restart Bannerlord.
 
+Troop names now use each mapped character's `display_name` from `character_replacements.xml`, including party lists and troop trees. `BrainrotTroopNames` applies the labels through the managed character name getters at module startup. Edit the XML and restart Bannerlord to change a label; missing or blank display names retain the native troop name. Heroes keep their personal names. The override does not write names or custom objects into campaign saves and is removed when the module unloads.
+
+The Release DLL is deployed to the client and editor module folders. Managed checks pass for all 36 catalog names, the installed troop-tree view model, native-name preservation and restoration, hero exclusions, and the existing appearance/selector behavior. In-game UI confirmation remains manual.
+
 current problems - 
 gigachad uv mapping is bugged
 pepsi man uv mapping is bugged

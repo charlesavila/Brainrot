@@ -28,6 +28,7 @@ namespace Brainrot
             Debug.Print("Brainrot: submodule loaded.");
             BrainrotPreviewLog.Start();
             BrainrotPreviewLog.Write("Stage 7: hero skin selection; installation deferred until game actions are loaded.");
+            TryInstallTroopNames();
         }
 
         protected override void OnBeforeInitialModuleScreenSetAsRoot()
@@ -44,6 +45,7 @@ namespace Brainrot
 
         private static void TryInstallPreview()
         {
+            TryInstallTroopNames();
             try
             {
                 BrainrotPartyPreview.Install();
@@ -57,8 +59,22 @@ namespace Brainrot
             }
         }
 
+        private static void TryInstallTroopNames()
+        {
+            // Names use only managed character data and can be patched before any UI caches labels.
+            try
+            {
+                BrainrotTroopNames.Install();
+            }
+            catch (Exception exception)
+            {
+                BrainrotPreviewLog.Write("Troop name hooks could not be installed: " + exception);
+            }
+        }
+
         protected override void OnSubModuleUnloaded()
         {
+            BrainrotTroopNames.Uninstall();
             BrainrotAgentBodyRenderer.Uninstall();
             BrainrotSkinSelector.Uninstall();
             BrainrotTroopPortraits.Uninstall();

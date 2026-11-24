@@ -10,8 +10,11 @@ namespace Brainrot
     {
         private readonly Dictionary<string, string> replacements =
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, string> displayNames =
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         internal readonly HashSet<string> CharacterIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        internal IReadOnlyDictionary<string, string> DisplayNames => displayNames;
 
         public IReadOnlyDictionary<string, string> Replacements
         {
@@ -65,6 +68,8 @@ namespace Brainrot
 
                 string itemId = characterId + "_body_armor";
                 config.replacements.Add(troopId, itemId);
+                string displayName = element.GetAttribute("display_name").Trim();
+                if (displayName.Length > 0) config.displayNames.Add(troopId, displayName);
                 Debug.Print("Brainrot: loaded character " + characterId + " with mesh " + meshName +
                     " for troop " + troopId + " -> " + itemId);
             }

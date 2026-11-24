@@ -60,6 +60,7 @@ using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Xml;
 using HarmonyLib;
@@ -67,6 +68,7 @@ using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
 using TaleWorlds.Core.ImageIdentifiers;
 using TaleWorlds.Engine;
+using TaleWorlds.Localization;
 using TaleWorlds.MountAndBlade;
 using TaleWorlds.MountAndBlade.View.Tableaus;
 using TaleWorlds.MountAndBlade.View.Tableaus.Thumbnails;
@@ -112,6 +114,83 @@ public static class BrainrotPreviewChecks
     {
         if (FailSkinSave) throw new IOException("Simulated preferences write failure");
         return false;
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static string ReadTroopName(BasicCharacterObject character)
+    {
+        return character.Name.ToString();
+    }
+
+    private static void RunTroopNameChecks(XmlElement[] entries)
+    {
+        Type names = Preview.Assembly.GetType("Brainrot.BrainrotTroopNames", true);
+        var install = names.GetMethod("Install", Hidden);
+        var uninstall = names.GetMethod("Uninstall", Hidden);
+        var nativeNameField = AccessTools.Field(typeof(BasicCharacterObject), "_basicName");
+        var nativeName = new TextObject("Native troop name");
+        var troop = (CharacterObject)FormatterServices.GetUninitializedObject(typeof(CharacterObject));
+        nativeNameField.SetValue(troop, nativeName);
+        try
+        {
+            install.Invoke(null, null);
+            install.Invoke(null, null);
+            var baseGetter = AccessTools.DeclaredPropertyGetter(typeof(BasicCharacterObject), "Name");
+            var campaignGetter = AccessTools.DeclaredPropertyGetter(typeof(CharacterObject), "Name");
+            Check(Harmony.GetPatchInfo(baseGetter).Owners.Contains("Brainrot.TroopNames") &&
+                Harmony.GetPatchInfo(campaignGetter).Owners.Contains("Brainrot.TroopNames"),
+                "Troop names install on both real character getters before native actions are ready");
+            foreach (var entry in entries)
+            {
+                troop.StringId = entry.GetAttribute("troop_id");
+                string expected = entry.GetAttribute("display_name").Trim();
+                if (ReadTroopName(troop) != expected || baseGetter.Invoke(troop, null).ToString() != expected ||
+                    !ReferenceEquals(nativeNameField.GetValue(troop), nativeName))
+                    throw new Exception("Display name or original name changed for " + troop.StringId);
+            }
+            Check(true, "All " + entries.Length + " catalog display names reach character labels without overwriting native names");
+
+            troop.StringId = "STURGIAN_VETERAN_BOWMAN";
+            Check(ReadTroopName(troop) == "TF2 Heavy", "Troop name lookups preserve case-insensitive catalog IDs");
+
+            Type unitVm = Assembly.Load("TaleWorlds.CampaignSystem.ViewModelCollection").GetType(
+                "TaleWorlds.CampaignSystem.ViewModelCollection.Encyclopedia.Items.EncyclopediaUnitVM", true);
+            object unit = FormatterServices.GetUninitializedObject(unitVm);
+            AccessTools.Field(unitVm, "_character").SetValue(unit, troop);
+            unitVm.GetMethod("RefreshValues").Invoke(unit, null);
+            Check((string)unitVm.GetProperty("NameText").GetValue(unit, null) == "TF2 Heavy",
+                "The installed troop-tree view model displays the configured meme name");
+
+            troop.StringId = "unmapped_name_check";
+            Check(ReferenceEquals(campaignGetter.Invoke(troop, null), nativeName),
+                "Unmapped campaign troops retain the original name object");
+            troop.StringId = "";
+            Check(ReferenceEquals(campaignGetter.Invoke(troop, null), nativeName),
+                "Characters without an ID retain their native names");
+
+            var basic = (BasicCharacterObject)FormatterServices.GetUninitializedObject(typeof(BasicCharacterObject));
+            basic.StringId = "sturgian_veteran_bowman";
+            nativeNameField.SetValue(basic, nativeName);
+            Check(ReadTroopName(basic) == "TF2 Heavy", "Basic mission characters use the same configured troop names");
+            AccessTools.Field(typeof(BasicCharacterObject), "_isBasicHero").SetValue(basic, true);
+            Check(ReferenceEquals(baseGetter.Invoke(basic, null), nativeName), "Basic hero names bypass troop replacements");
+
+            var hero = (Hero)FormatterServices.GetUninitializedObject(typeof(Hero));
+            var heroName = new TextObject("Original companion name");
+            AccessTools.Field(typeof(Hero), "_name").SetValue(hero, heroName);
+            AccessTools.Field(typeof(CharacterObject), "_heroObject").SetValue(troop, hero);
+            troop.StringId = "sturgian_veteran_bowman";
+            Check(ReferenceEquals(campaignGetter.Invoke(troop, null), heroName),
+                "Player and companion names remain native even if their ID matches a mapped troop");
+            AccessTools.Field(typeof(CharacterObject), "_heroObject").SetValue(troop, null);
+        }
+        finally
+        {
+            uninstall.Invoke(null, null);
+        }
+        Check(!Harmony.GetAllPatchedMethods().Any(method => Harmony.GetPatchInfo(method).Owners.Contains("Brainrot.TroopNames")) &&
+            ReferenceEquals(AccessTools.DeclaredPropertyGetter(typeof(CharacterObject), "Name").Invoke(troop, null), nativeName),
+            "Removing troop name hooks restores the original name on the same campaign character");
     }
 
     private static void RunSkinChecks()
@@ -312,6 +391,19 @@ public static class BrainrotPreviewChecks
             var reduced = (IReadOnlyDictionary<string, string>)mappingsProperty.GetValue(loadCatalog.Invoke(null, new object[] { fixturePath }), null);
             Check(reduced.Count == 1 && !reduced.ContainsKey("looter") && reduced["battanian_volunteer"] == "mike_body_armor",
                 "Removing a catalog entry cannot resurrect its obsolete fallback mapping");
+            File.WriteAllText(fixturePath, "<BrainrotCharacters>" +
+                "<Character id='heavy' mesh='heavy' troop_id='heavy_troop' display_name=' TF2 Heavy ' />" +
+                "<Character id='duplicate' mesh='other' troop_id='HEAVY_TROOP' display_name='Wrong name' />" +
+                "<Character id='unnamed' mesh='other' troop_id='unnamed_troop' />" +
+                "<Character id='blank' mesh='other' troop_id='blank_troop' display_name='  ' />" +
+                "<Character id='invalid' troop_id='invalid_troop' display_name='Invalid' />" +
+                "<Character id='hero_only' mesh='other' display_name='Hero skin only' />" +
+                "</BrainrotCharacters>");
+            var namedConfig = loadCatalog.Invoke(null, new object[] { fixturePath });
+            var displayNames = (IReadOnlyDictionary<string, string>)configType.GetProperty("DisplayNames",
+                BindingFlags.NonPublic | BindingFlags.Instance).GetValue(namedConfig, null);
+            Check(displayNames.Count == 1 && displayNames["HEAVY_TROOP"] == "TF2 Heavy",
+                "Duplicate, invalid, unnamed and hero-only catalog entries cannot supply a wrong troop name");
             File.WriteAllText(fixturePath, "<BrainrotCharacters />");
             var empty = (IReadOnlyDictionary<string, string>)mappingsProperty.GetValue(loadCatalog.Invoke(null, new object[] { fixturePath }), null);
             Check(empty.Count == 0, "An empty character catalog disables every replacement");
@@ -395,6 +487,7 @@ public static class BrainrotPreviewChecks
             prefix: new HarmonyMethod(typeof(BrainrotPreviewChecks), "ActionLookupPrefix"));
         try
         {
+            RunTroopNameChecks(entries);
             SimulatedActionCount = 0;
             Preview.GetMethod("Install", Hidden).Invoke(null, null);
             Portraits.GetMethod("Install", Hidden).Invoke(null, null);
